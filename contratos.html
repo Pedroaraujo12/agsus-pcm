@@ -9,14 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; overflow-x: hidden; }
         .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .nav-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; margin-bottom: 12px; color: #94a3b8; }
         .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
         .main-content { height: 100vh; overflow-y: auto; }
         .contract-timeline { border-left: 2px solid rgba(255,255,255,0.1); margin-left: 10px; padding-left: 20px; }
-        .timeline-node { position: relative; margin-bottom: 20px; }
+        .timeline-node { position: relative; margin-bottom: 25px; }
         .timeline-node::before { content: ""; position: absolute; left: -27px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 3px solid #0f172a; }
+        .timeline-node.aditivo::before { background: #f59e0b; }
         .badge-vigencia { font-size: 8px; font-weight: 900; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -28,92 +29,128 @@
     <aside class="w-20 h-screen glass-card border-r border-white/5 flex flex-col items-center py-8 z-50">
         <div class="mb-10 text-blue-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <nav class="flex flex-col flex-1">
-            <div class="nav-item" onclick="location.href='index.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
-            <div class="nav-item" onclick="location.href='editais.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-            <div class="nav-item" onclick="location.href='fornecedores.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
-            <div class="nav-item active" onclick="location.href='contratos.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg></div>
+            <div class="nav-item" onclick="location.href='index.html'" title="Dashboard"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+            <div class="nav-item" onclick="location.href='editais.html'" title="Editais"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <div class="nav-item" onclick="location.href='fornecedores.html'" title="Fornecedores"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+            <div class="nav-item" onclick="location.href='propostas.html'" title="Propostas"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></div>
+            <div class="nav-item active" onclick="location.href='contratos.html'" title="Contratos"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg></div>
         </nav>
     </aside>
 
     <main class="flex-1 main-content p-8">
         <header class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
             <div>
-                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo de Gestão Administrativa</p>
-                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Contratos & Aditivos</h1>
+                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo de Gestão 360º</p>
+                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Gestão Contratual Real</h1>
             </div>
-            <div class="flex gap-4">
-                <div class="glass-card px-4 py-2 rounded-xl text-[10px] font-bold border border-white/5 flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full bg-blue-500"></span> 12 Contratos Ativos
-                </div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('modalContrato').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase shadow-lg">+ Novo Contrato</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- LISTAGEM DE CONTRATOS -->
-            <div class="lg:col-span-2 space-y-6">
+            <!-- LISTAGEM REAL -->
+            <div class="lg:col-span-2">
                 <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
-                    <div class="p-6 border-b border-white/5 bg-white/5 flex justify-between items-center">
-                        <h2 class="text-xs font-black uppercase tracking-widest text-slate-100">Vigências e Saldos</h2>
+                    <div class="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                        <h2 class="text-xs font-black uppercase text-slate-100 tracking-widest">Contratos Registrados no Banco</h2>
                     </div>
                     <div class="overflow-x-hidden">
                         <table class="w-full text-left table-fixed">
                             <thead>
                                 <tr class="text-[9px] font-black uppercase text-slate-500 border-b border-white/10 bg-slate-900/50">
                                     <th class="w-[25%] px-6 py-4">Nº Contrato</th>
-                                    <th class="w-[35%] px-6 py-4">Fornecedor</th>
-                                    <th class="w-[20%] px-6 py-4 text-center">Vencimento</th>
-                                    <th class="w-[20%] px-6 py-4 text-right">Valor Total</th>
+                                    <th class="w-[45%] px-6 py-4">Fornecedor / Objeto</th>
+                                    <th class="w-[30%] px-6 py-4 text-right">Valor Global</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-[10px] divide-y divide-white/5">
-                                <tr class="hover:bg-white/5 transition cursor-pointer" onclick="selectContract('CT 01/2026')">
-                                    <td class="px-6 py-5 font-black text-blue-400">CT 01/2026</td>
-                                    <td class="px-6 py-5">
-                                        <div class="font-bold text-slate-100 uppercase">Mobiliário Prime</div>
-                                        <div class="text-[8px] text-slate-500">Proc: 001197/2026</div>
-                                    </td>
-                                    <td class="px-6 py-5 text-center"><span class="badge-vigencia bg-blue-500/10 text-blue-400">Em 12 meses</span></td>
-                                    <td class="px-6 py-5 text-right font-black text-slate-100">R$ 131.807,55</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="contratoTable" class="text-[10px] divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- PAINEL DE ALTERAÇÕES (DETALHE) -->
-            <div class="glass-card p-8 rounded-3xl space-y-8 h-fit">
-                <h2 class="text-xs font-black uppercase tracking-widest text-blue-400">Linha do Tempo: <span id="selCT">--</span></h2>
-                
-                <div class="contract-timeline">
-                    <div class="timeline-node">
-                        <p class="text-[10px] font-black text-slate-100 uppercase">Contrato Original</p>
-                        <p class="text-[9px] text-slate-500">Assinado em 01/01/2026</p>
-                        <p class="text-[10px] font-bold text-blue-400 mt-1">R$ 131.807,55</p>
-                    </div>
-                    <div class="timeline-node">
-                        <p class="text-[10px] font-black text-amber-400 uppercase">Apostilamento 01</p>
-                        <p class="text-[9px] text-slate-500">Ajuste de Dotação</p>
-                        <p class="text-[9px] text-slate-400 italic">Sem alteração de valor</p>
-                    </div>
-                    <div class="timeline-node opacity-40">
-                        <p class="text-[10px] font-black text-slate-500 uppercase">Aditivo de Acréscimo</p>
-                        <p class="text-[9px] text-slate-500 italic">Nenhum aditivo registrado</p>
-                    </div>
-                </div>
-
-                <div class="pt-4 border-t border-white/5 grid grid-cols-2 gap-3">
-                    <button class="bg-white/5 hover:bg-white/10 text-white p-3 rounded-xl text-[8px] font-black uppercase transition border border-white/10">+ Aditivo</button>
-                    <button class="bg-white/5 hover:bg-white/10 text-white p-3 rounded-xl text-[8px] font-black uppercase transition border border-white/10">+ Apostilamento</button>
+            <!-- LINHA DO TEMPO DINÂMICA -->
+            <div id="timelinePanel" class="glass-card p-8 rounded-3xl space-y-8 h-fit hidden">
+                <h2 class="text-xs font-black uppercase tracking-widest text-blue-400">Histórico: <span id="selCT">--</span></h2>
+                <div id="timelineContent" class="contract-timeline"></div>
+                <div class="pt-4 border-t border-white/5 flex gap-2">
+                    <button id="btnAddAlteracao" class="w-full bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white p-3 rounded-xl text-[8px] font-black uppercase transition border border-blue-600/20">+ Registrar Aditivo/Apos.</button>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Modal Novo Contrato -->
+    <div id="modalContrato" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[100] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center"><h2 class="text-lg font-black uppercase text-white">Cadastrar Contrato</h2><button onclick="document.getElementById('modalContrato').classList.add('hidden')" class="text-white opacity-50">&times;</button></div>
+            <form id="contractForm" class="p-8 space-y-6">
+                <div><label class="text-[9px] font-black text-slate-500 uppercase">Processo Origem</label><select id="ct_proc" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase">Fornecedor</label><select id="ct_forn" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase">Nº Contrato</label><input type="text" id="ct_num" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase">Valor Global</label><input type="number" step="0.01" id="ct_valor" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl uppercase text-xs tracking-widest">Gerar Contrato no Banco</button>
+            </form>
+        </div>
+    </div>
+
     <script>
-        function selectContract(id) {
-            document.getElementById('selCT').innerText = id;
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function init() {
+            const { data: procs } = await sb.from('licitacoes').select('id_processo');
+            const { data: forns } = await sb.from('fornecedores').select('id, razao_social');
+            const selP = document.getElementById('ct_proc');
+            const selF = document.getElementById('ct_forn');
+            procs.forEach(p => selP.add(new Option(p.id_processo, p.id_processo)));
+            forns.forEach(f => selF.add(new Option(f.razao_social, f.id)));
+            loadContratos();
         }
+
+        async function loadContratos() {
+            const { data } = await sb.from('contratos').select('*, fornecedores(razao_social)').order('created_at', {ascending: false});
+            const table = document.getElementById('contratoTable');
+            table.innerHTML = data.map(c => `
+                <tr class="hover:bg-white/5 transition cursor-pointer" onclick="showTimeline('${c.id}', '${c.numero_contrato}')">
+                    <td class="px-6 py-5 font-black text-blue-400">${c.numero_contrato}</td>
+                    <td class="px-6 py-5"><div class="font-bold text-slate-100 uppercase">${c.fornecedores.razao_social}</div><div class="text-[8px] text-slate-500">Proc: ${c.processo_id}</div></td>
+                    <td class="px-6 py-5 text-right font-black text-slate-100">R$ ${parseFloat(c.valor_global).toLocaleString('pt-br')}</td>
+                </tr>`).join('');
+        }
+
+        async function showTimeline(cid, cnum) {
+            document.getElementById('selCT').innerText = cnum;
+            document.getElementById('timelinePanel').classList.remove('hidden');
+            const { data: alts } = await sb.from('contrato_alteracoes').select('*').eq('contrato_id', cid).order('data_registro');
+            const content = document.getElementById('timelineContent');
+            
+            let html = `<div class="timeline-node"><p class="text-[10px] font-black text-slate-100 uppercase">Assinatura do Contrato</p><p class="text-[9px] text-slate-500">Marco Inaugural</p></div>`;
+            html += alts.map(a => `
+                <div class="timeline-node aditivo">
+                    <p class="text-[10px] font-black text-amber-400 uppercase">${a.tipo_alteracao}</p>
+                    <p class="text-[9px] text-slate-100">${a.justificativa || 'Sem justificativa'}</p>
+                    <p class="text-[10px] font-bold text-blue-400 mt-1">Impacto: R$ ${parseFloat(a.valor_alteracao).toLocaleString('pt-br')}</p>
+                </div>`).join('');
+            content.innerHTML = html;
+        }
+
+        document.getElementById('contractForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            await sb.from('contratos').insert([{
+                numero_contrato: document.getElementById('ct_num').value,
+                processo_id: document.getElementById('ct_proc').value,
+                fornecedor_id: document.getElementById('ct_forn').value,
+                valor_global: document.getElementById('ct_valor').value
+            }]);
+            location.reload();
+        });
+
+        init();
     </script>
 </body>
 </html>
