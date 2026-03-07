@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgSUS PCM | Novo Processo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --glass: rgba(30, 41, 59, 0.7); }
@@ -13,6 +14,7 @@
         .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; transition: all 0.2s; }
         .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
         label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+        .btn-loading { opacity: 0.7; pointer-events: none; }
     </style>
 </head>
 <body class="p-4 md:p-8 flex justify-center items-center">
@@ -20,49 +22,49 @@
     <div class="glass-card w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl">
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6 flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-black uppercase tracking-tight text-white">Novo Processo Licitatório</h2>
-                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest">Workflow das 17 Etapas • Lei 14.133/21</p>
+                <h2 class="text-xl font-black uppercase tracking-tight text-white">Protocolar Novo Processo</h2>
+                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest">Integração Direta com Supabase AgSUS</p>
             </div>
             <a href="index.html" class="text-white opacity-50 hover:opacity-100 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></a>
         </div>
 
-        <form class="p-8 space-y-6">
+        <form id="procForm" class="p-8 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label>ID do Processo (SEI)</label>
-                    <input type="text" placeholder="AGSUS.XXXXXX/2026-XX" class="form-input">
+                    <input type="text" id="id_processo" required placeholder="AGSUS.00XXXX/2026-XX" class="form-input">
                 </div>
                 <div>
                     <label>Objeto Resumido</label>
-                    <input type="text" placeholder="Ex: Aquisição de Mobiliário" class="form-input">
+                    <input type="text" id="objeto_resumido" required placeholder="Descreva o objeto..." class="form-input">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label>Demandante</label>
-                    <select class="form-input">
-                        <option>NAAGE</option>
-                        <option>Diretoria</option>
-                        <option>Saúde</option>
-                        <option>Infraestrutura</option>
+                    <select id="demandante" class="form-input">
+                        <option value="NAAGE">NAAGE</option>
+                        <option value="DIRETORIA">Diretoria</option>
+                        <option value="SAUDE">Saúde</option>
+                        <option value="INFRA">Infraestrutura</option>
                     </select>
                 </div>
                 <div>
                     <label>Modalidade</label>
-                    <select class="form-input">
-                        <option>Pregão Eletrônico</option>
-                        <option>Cotação de Preços</option>
-                        <option>Dispensa</option>
-                        <option>Inexigibilidade</option>
+                    <select id="modalidade" class="form-input">
+                        <option value="Pregão Eletrônico">Pregão Eletrônico</option>
+                        <option value="Cotação de Preços">Cotação de Preços</option>
+                        <option value="Dispensa">Dispensa</option>
+                        <option value="Inexigibilidade">Inexigibilidade</option>
                     </select>
                 </div>
                 <div>
                     <label>Prioridade</label>
-                    <select class="form-input">
-                        <option>Normal</option>
-                        <option>Alta</option>
-                        <option>Urgente</option>
+                    <select id="prioridade" class="form-input">
+                        <option value="Normal">Normal</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Urgente">Urgente</option>
                     </select>
                 </div>
             </div>
@@ -70,25 +72,72 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label>Valor Estimado (R$)</label>
-                    <input type="number" step="0.01" placeholder="0,00" class="form-input">
+                    <input type="number" id="vlr_estimado" step="0.01" required placeholder="0.00" class="form-input">
                 </div>
                 <div>
                     <label>Data de Entrada</label>
-                    <input type="date" class="form-input">
+                    <input type="date" id="data_entrada" required class="form-input">
                 </div>
             </div>
 
             <div>
-                <label>Observações Estratégicas</label>
-                <textarea rows="3" placeholder="Notas sobre o planejamento inicial..." class="form-input"></textarea>
+                <label>Observações Iniciais</label>
+                <textarea id="observacoes" rows="3" placeholder="Notas estratégicas..." class="form-input"></textarea>
             </div>
 
+            <div id="statusMsg" class="hidden p-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center"></div>
+
             <div class="pt-4 flex gap-4">
-                <button type="button" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition uppercase text-xs tracking-widest">Salvar Rascunho</button>
-                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition uppercase text-xs tracking-widest">Protocolar Processo</button>
+                <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition uppercase text-xs tracking-widest">Confirmar Protocolo</button>
             </div>
         </form>
     </div>
 
+    <script>
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('procForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            const msg = document.getElementById('statusMsg');
+            
+            btn.innerText = "PROCESSANDO...";
+            btn.classList.add('btn-loading');
+
+            const payload = {
+                id_processo: document.getElementById('id_processo').value,
+                objeto_resumido: document.getElementById('objeto_resumido').value,
+                demandante: document.getElementById('demandante').value,
+                modalidade: document.getElementById('modalidade').value,
+                prioridade: document.getElementById('prioridade').value,
+                vlr_estimado_anual: document.getElementById('vlr_estimado').value,
+                data_entrada: document.getElementById('data_entrada').value,
+                observacoes: document.getElementById('observacoes').value,
+                status: 'Não recebido',
+                coordenacao: 'CCS.RD'
+            };
+
+            const { data, error } = await supabaseClient
+                .from('licitacoes')
+                .insert([payload]);
+
+            if (error) {
+                msg.innerText = "ERRO AO PROTOCOLAR: " + error.message;
+                msg.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-500');
+                msg.classList.add('bg-red-500/10', 'text-red-500');
+            } else {
+                msg.innerText = "PROCESSO PROTOCOLADO COM SUCESSO NO BANCO!";
+                msg.classList.remove('hidden', 'bg-red-500/10', 'text-red-500');
+                msg.classList.add('bg-emerald-500/10', 'text-emerald-500');
+                document.getElementById('procForm').reset();
+                setTimeout(() => { window.location.href = "index.html"; }, 2000);
+            }
+
+            btn.innerText = "CONFIRMAR PROTOCOLO";
+            btn.classList.remove('btn-loading');
+        });
+    </script>
 </body>
 </html>
