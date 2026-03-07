@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgSUS PCM | Gestão de Fornecedores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --glass: rgba(30, 41, 59, 0.7); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; overflow: hidden; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; margin-bottom: 12px; color: #94a3b8; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .main-content { height: 100vh; overflow-y: auto; }
+        .rating-star { color: #facc15; }
+        .cnd-valid { color: #22c55e; }
+        .cnd-invalid { color: #ef4444; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- BARRA LATERAL -->
+    <aside class="w-20 h-screen glass-card border-r border-white/5 flex flex-col items-center py-8 z-50">
+        <div class="mb-10 text-blue-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <nav class="flex flex-col flex-1">
+            <div class="nav-item" onclick="location.href='index.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+            <div class="nav-item" onclick="location.href='editais.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <div class="nav-item active" onclick="location.href='fornecedores.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 main-content p-8">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo SRM (Supplier Relationship Management)</p>
+                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Gestão de Fornecedores</h1>
+            </div>
+            <div class="flex gap-4">
+                <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg">+ Novo Fornecedor</button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD DE FORNECEDORES -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-blue-500">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Empresas Cadastradas</p>
+                <h3 id="totalFornecedores" class="text-3xl font-black">--</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-emerald-500">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Regularidade Fiscal (CND)</p>
+                <h3 class="text-3xl font-black text-emerald-400">100% OK</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-fuchsia-500">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Rating Médio</p>
+                <h3 class="text-3xl font-black text-fuchsia-400">4.8 / 5.0</h3>
+            </div>
+        </div>
+
+        <!-- LISTAGEM DE FORNECEDORES -->
+        <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-sm font-black uppercase tracking-widest text-slate-100">Dossiê de Performance</h2>
+            </div>
+            <div class="overflow-x-hidden">
+                <table class="w-full text-left table-fixed">
+                    <thead>
+                        <tr class="text-[9px] font-black uppercase text-slate-500 border-b border-white/10 bg-slate-900/50">
+                            <th class="w-[30%] px-8 py-5">Fornecedor / CNPJ</th>
+                            <th class="w-[20%] px-8 py-5">Categoria</th>
+                            <th class="w-[15%] px-8 py-5 text-center">Status CND</th>
+                            <th class="w-[15%] px-8 py-5 text-center">Rating</th>
+                            <th class="w-[20%] px-8 py-5 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fornecedorTable" class="text-[10px] divide-y divide-white/5">
+                        <!-- Carregamento dinâmico do banco de dados -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadFornecedores() {
+            // Tenta carregar da tabela fornecedores, se não existir, usa mock para o protótipo visual
+            const { data, error } = await sb.from('fornecedores').select('*');
+            
+            const table = document.getElementById('fornecedorTable');
+            const totalEl = document.getElementById('totalFornecedores');
+            
+            const displayData = data && data.length > 0 ? data : [
+                { razao_social: "TecnoHealth Soluções Hospitalares", cnpj: "12.345.678/0001-90", categoria: "Saúde", rating: 5.0 },
+                { razao_social: "Mobiliário Prime Brasil Ltda", cnpj: "98.765.432/0001-10", categoria: "Mobiliário", rating: 4.5 },
+                { razao_social: "InfraRed Engenharia de Redes", cnpj: "45.678.901/0001-44", categoria: "TI / Infra", rating: 4.2 }
+            ];
+
+            totalEl.innerText = displayData.length;
+
+            table.innerHTML = displayData.map(f => `
+                <tr class="hover:bg-white/5 transition">
+                    <td class="px-8 py-6">
+                        <div class="font-black text-slate-100 text-[11px] mb-1">${f.razao_social}</div>
+                        <div class="text-[8px] text-slate-500 uppercase tracking-widest">${f.cnpj}</div>
+                    </td>
+                    <td class="px-8 py-6 text-slate-400 font-bold">${f.categoria || 'Geral'}</td>
+                    <td class="px-8 py-6 text-center">
+                        <span class="cnd-valid">
+                            <svg class="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </span>
+                    </td>
+                    <td class="px-8 py-6 text-center">
+                        <div class="flex justify-center gap-0.5">
+                            ${Array(Math.floor(f.rating)).fill('<svg class="w-3 h-3 rating-star" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>').join('')}
+                        </div>
+                    </td>
+                    <td class="px-8 py-6 text-right">
+                        <button class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition border border-white/5">Ver Dossiê</button>
+                    </td>
+                </tr>`).join('');
+        }
+        loadFornecedores();
+    </script>
+</body>
+</html>
