@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgSUS PCM | Propostas & Julgamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --glass: rgba(30, 41, 59, 0.7); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; overflow: hidden; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; margin-bottom: 12px; color: #94a3b8; }
+        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .main-content { height: 100vh; overflow-y: auto; }
+        .winner-row { background: rgba(16, 185, 129, 0.05); border-left: 4px solid #10b981 !important; }
+        .badge-saving { background: #10b981; color: white; padding: 2px 6px; border-radius: 6px; font-size: 8px; font-weight: 900; text-transform: uppercase; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- BARRA LATERAL -->
+    <aside class="w-20 h-screen glass-card border-r border-white/5 flex flex-col items-center py-8 z-50">
+        <div class="mb-10 text-blue-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <nav class="flex flex-col flex-1">
+            <div class="nav-item" onclick="location.href='index.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+            <div class="nav-item" onclick="location.href='editais.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <div class="nav-item" onclick="location.href='fornecedores.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+            <div class="nav-item active" onclick="location.href='propostas.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg></div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 main-content p-8">
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
+            <div>
+                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo de Julgamento</p>
+                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Análise de Propostas</h1>
+            </div>
+            <div class="flex gap-3">
+                <select id="selectProcesso" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white outline-none focus:border-blue-500 transition">
+                    <option value="">Selecione um Processo...</option>
+                </select>
+                <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg">+ Novo Lance</button>
+            </div>
+        </header>
+
+        <!-- MAPA COMPARATIVO -->
+        <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <div>
+                    <h2 class="text-sm font-black uppercase tracking-widest text-slate-100">Mapa Comparativo de Lances</h2>
+                    <p class="text-[10px] text-slate-500 mt-1 uppercase font-bold">Ordenação Automática por Menor Preço</p>
+                </div>
+                <div id="savingHighlight" class="hidden glass-card px-4 py-2 rounded-xl border border-emerald-500/20 text-emerald-400 font-black text-xs uppercase tracking-tighter">
+                    Saving Projetado: R$ 0,00
+                </div>
+            </div>
+            
+            <div class="overflow-x-hidden">
+                <table class="w-full text-left table-fixed">
+                    <thead>
+                        <tr class="text-[9px] font-black uppercase text-slate-500 border-b border-white/10 bg-slate-900/50">
+                            <th class="w-[10%] px-8 py-5">Rank</th>
+                            <th class="w-[35%] px-8 py-5">Fornecedor</th>
+                            <th class="w-[20%] px-8 py-5 text-right">Valor do Lance</th>
+                            <th class="w-[15%] px-8 py-5 text-center">Desconto (%)</th>
+                            <th class="w-[20%] px-8 py-5 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="propostaTable" class="text-[10px] divide-y divide-white/5">
+                        <!-- Gerado dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MENSAGEM INICIAL -->
+        <div id="emptyMsg" class="mt-20 text-center opacity-30">
+            <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            <p class="text-sm font-bold uppercase tracking-widest">Selecione um processo para carregar o mapa</p>
+        </div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function init() {
+            const { data: processos } = await sb.from('licitacoes').select('id_processo, objeto_resumido, vlr_estimado_anual').order('id_processo');
+            const select = document.getElementById('selectProcesso');
+            processos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id_processo;
+                opt.dataset.estimado = p.vlr_estimado_anual;
+                opt.innerText = `${p.id_processo} - ${p.objeto_resumido.substring(0,20)}...`;
+                select.appendChild(opt);
+            });
+
+            select.addEventListener('change', (e) => loadMap(e.target.value, e.target.options[e.target.selectedIndex].dataset.estimado));
+        }
+
+        function loadMap(procId, estimado) {
+            if (!procId) return;
+            document.getElementById('emptyMsg').classList.add('hidden');
+            const table = document.getElementById('propostaTable');
+            const savingBox = document.getElementById('savingHighlight');
+            
+            // Simulação de lances para o protótipo
+            const mockLances = [
+                { nome: "TecnoHealth Soluções", valor: estimado * 0.85 },
+                { nome: "Global Supply Ag", valor: estimado * 0.92 },
+                { nome: "Brasil Compras Ltda", valor: estimado * 0.98 }
+            ].sort((a,b) => a.valor - b.valor);
+
+            const bestValue = mockLances[0].valor;
+            const saving = estimado - bestValue;
+            savingBox.innerText = `Saving Projetado: R$ ${saving.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
+            savingBox.classList.remove('hidden');
+
+            table.innerHTML = mockLances.map((l, idx) => {
+                const desc = ((1 - (l.valor/estimado)) * 100).toFixed(1);
+                return `
+                <tr class="${idx === 0 ? 'winner-row' : ''} transition">
+                    <td class="px-8 py-6 font-black ${idx === 0 ? 'text-emerald-400' : 'text-slate-500'}">#0${idx+1}</td>
+                    <td class="px-8 py-6">
+                        <div class="font-bold text-slate-100">${l.nome}</div>
+                        ${idx === 0 ? '<span class="text-[7px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-black uppercase">Melhor Oferta</span>' : ''}
+                    </td>
+                    <td class="px-8 py-6 text-right font-black text-slate-100">R$ ${l.valor.toLocaleString('pt-br', {minimumFractionDigits: 2})}</td>
+                    <td class="px-8 py-6 text-center"><span class="badge-saving">${desc}%</span></td>
+                    <td class="px-8 py-6 text-right">
+                        <span class="px-3 py-1 rounded-lg border ${idx === 0 ? 'border-emerald-500/20 text-emerald-400' : 'border-slate-700 text-slate-500'} font-bold uppercase text-[8px]">
+                            ${idx === 0 ? 'Vencedor' : 'Classificado'}
+                        </span>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+        init();
+    </script>
+</body>
+</html>
