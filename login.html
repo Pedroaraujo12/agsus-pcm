@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgSUS PCM | Login Seguro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --glass: rgba(30, 41, 59, 0.7); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl text-center">
+        <div class="mb-8 flex justify-center">
+            <div class="h-16 w-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+        </div>
+        
+        <h1 class="text-2xl font-black uppercase tracking-tight mb-2">Portal AgSUS PCM</h1>
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-10">Sistema de Gestão de Compras</p>
+
+        <form id="loginForm" class="space-y-6 text-left">
+            <div>
+                <label class="text-[9px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">E-mail Institucional</label>
+                <input type="email" id="email" required class="w-full bg-slate-800/50 border border-slate-700 rounded-2xl p-4 text-xs text-white outline-none focus:border-blue-500 transition">
+            </div>
+            <div>
+                <label class="text-[9px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Senha de Acesso</label>
+                <input type="password" id="password" required class="w-full bg-slate-800/50 border border-slate-700 rounded-2xl p-4 text-xs text-white outline-none focus:border-blue-500 transition">
+            </div>
+
+            <div id="loginError" class="hidden p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-bold text-red-400 uppercase text-center"></div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl uppercase text-xs tracking-widest transition shadow-xl shadow-blue-600/20">Acessar Sistema</button>
+        </form>
+
+        <div class="mt-8 pt-8 border-t border-white/5 flex flex-col gap-4">
+             <button onclick="loginGoogle()" class="w-full bg-white/5 hover:bg-white/10 text-slate-300 font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest transition border border-white/10 flex items-center justify-center gap-3">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-2.21 5.39-7.84 5.39-4.84 0-8.79-4.01-8.79-8.97s3.95-8.97 8.79-8.97c2.75 0 4.56 1.17 5.62 2.18l2.59-2.5c-1.66-1.55-3.82-2.51-8.21-2.51-6.63 0-12 5.37-12 12s5.37 12 12 12c6.93 0 11.53-4.87 11.53-11.72 0-.79-.08-1.4-.21-2.02h-11.32z"/></svg>
+                Entrar com Google AgSUS
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('loginError');
+
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                errorEl.innerText = "ACESSO NEGADO: " + error.message.toUpperCase();
+                errorEl.classList.remove('hidden');
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        async function loginGoogle() {
+            await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/agsus-pcm/index.html' } });
+        }
+    </script>
+</body>
+</html>
