@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgSUS PCM | Gestão de Compras</title>
+    <title>AgSUS PCM | Dashboard Estratégico</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; overflow: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; overflow: hidden; }
         .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .nav-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; margin-bottom: 12px; color: #94a3b8; }
         .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
         .main-content { height: 100vh; overflow-y: auto; }
-        .aging-badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; font-weight: 900; text-transform: uppercase; white-space: nowrap; }
+        .aging-badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; font-weight: 900; text-transform: uppercase; }
         .aging-red { background-color: #ef4444; color: white; }
-        .aging-yellow { background-color: #eab308; color: black; }
         .aging-green { background-color: #22c55e; color: white; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -25,53 +24,52 @@
 </head>
 <body class="flex">
 
-    <!-- BARRA LATERAL -->
+    <!-- BARRA LATERAL UNIFICADA -->
     <aside class="w-20 h-screen glass-card border-r border-white/5 flex flex-col items-center py-8 z-50">
         <div class="mb-10 text-blue-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-        <nav class="flex flex-col flex-1">
-            <div class="nav-item active" onclick="location.href='index.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
-            <div class="nav-item" onclick="location.href='novo-processo.html'"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg></div>
-            <div class="nav-item opacity-30"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <nav id="sidebarNav" class="flex flex-col flex-1">
+            <!-- Gerado dinamicamente para garantir links corretos -->
         </nav>
     </aside>
 
     <main class="flex-1 main-content p-8">
         <header class="mb-10 flex justify-between items-end">
             <div>
-                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">AgSUS PCM SaaS</p>
-                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Fluxo de Execução Real</h1>
+                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Interoperabilidade SEI Ativa</p>
+                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Dashboard de Comando</h1>
             </div>
-            <div class="flex gap-4">
-                <button onclick="location.href='novo-processo.html'" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/20">+ Novo Processo</button>
+            <div id="syncStatus" class="glass-card px-4 py-2 rounded-xl text-[10px] font-bold border border-emerald-500/20 text-emerald-400 flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> Banco Sincronizado
             </div>
         </header>
 
-        <!-- CARDS DINÂMICOS -->
+        <!-- INDICADORES GLOBAIS (CONECTADOS AO ID SEI) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="glass-card p-6 rounded-2xl"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos Totais</p><h3 id="totalCount" class="text-4xl font-extrabold">--</h3></div>
-            <div class="glass-card p-6 rounded-2xl"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Estimado</p><h3 id="totalValue" class="text-2xl font-extrabold text-slate-100">R$ 0,00</h3></div>
-            <div class="glass-card p-6 rounded-2xl"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Economia CCS</p><h3 id="totalSaving" class="text-2xl font-extrabold text-emerald-400">R$ 0,00</h3></div>
-            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-red-500"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Em Atraso</p><h3 id="overdueCount" class="text-4xl font-extrabold text-red-100">--</h3></div>
+            <div class="glass-card p-6 rounded-2xl"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos (ID SEI)</p><h3 id="stat_procs" class="text-4xl font-extrabold">--</h3></div>
+            <div class="glass-card p-6 rounded-2xl"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Investimento Total</p><h3 id="stat_val" class="text-2xl font-extrabold">R$ 0,00</h3></div>
+            <div class="glass-card p-6 rounded-2xl"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Savings Gerados</p><h3 id="stat_save" class="text-2xl font-extrabold text-emerald-400">R$ 0,00</h3></div>
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-red-500"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Gargalos Críticos</p><h3 id="stat_delay" class="text-4xl font-extrabold text-red-100">--</h3></div>
         </div>
 
-        <!-- TABELA CONECTADA AO BANCO -->
+        <!-- FLUXO DE EXECUÇÃO (MANTENDO APARÊNCIA E NO-SCROLL) -->
         <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Processos Licitatórios</h2>
+            <div class="p-6 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Rastreabilidade Ponta a Ponta</h2>
+                <button onclick="location.href='novo-processo.html'" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition">+ Novo Registro</button>
             </div>
             <div class="overflow-x-hidden">
                 <table class="w-full text-left table-fixed">
                     <thead class="bg-slate-900/50">
                         <tr class="text-[9px] font-black uppercase text-slate-500 border-b border-white/10 tracking-tighter">
-                            <th class="w-[20%] px-6 py-4">ID Processo</th>
+                            <th class="w-[20%] px-6 py-4">Chave (ID SEI)</th>
                             <th class="w-[30%] px-6 py-4">Fase Atual</th>
-                            <th class="w-[15%] px-6 py-4 text-center">Prazo Tarefa</th>
+                            <th class="w-[15%] px-6 py-4 text-center">Status Prazo</th>
                             <th class="w-[15%] px-6 py-4 text-center">Entrega Final</th>
                             <th class="w-[20%] px-6 py-4 text-right">Vlr Estimado</th>
                         </tr>
                     </thead>
-                    <tbody id="procTable" class="text-[10px] divide-y divide-white/5">
-                        <!-- Dados carregados via JS -->
+                    <tbody id="mainTable" class="text-[10px] divide-y divide-white/5">
+                        <!-- Conexão via Supabase -->
                     </tbody>
                 </table>
             </div>
@@ -83,35 +81,61 @@
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function cleanNum(v) { return v ? parseFloat(String(v)) || 0 : 0; }
-        function formatBRL(v) { return v.toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
-        function formatDate(d) { if(!d) return '-'; const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+        // CONFIGURAÇÃO DOS MÓDULOS (INTEROPERABILIDADE)
+        const modules = [
+            { id: 'dash', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html', active: true },
+            { id: 'editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
+            { id: 'forn', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
+            { id: 'prop', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
+            { id: 'aval', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
+            { id: 'cont', icon: '<path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>', link: 'contratos.html' },
+            { id: 'pag', icon: '<path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>', link: 'pagamentos.html' },
+            { id: 'rel', icon: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path><path d="M14 4v4h4"></path>', link: 'relatorios.html' }
+        ];
 
-        async function loadData() {
-            const { data, error } = await sb.from('licitacoes').select('*').order('created_at', { ascending: false });
+        function renderNav() {
+            const nav = document.getElementById('sidebarNav');
+            nav.innerHTML = modules.map(m => `
+                <div class="nav-item ${m.active?'active':''}" onclick="location.href='${m.link}'" title="${m.id.toUpperCase()}">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
+                </div>
+            `).join('');
+        }
+
+        async function bootstrap() {
+            renderNav();
+            const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
             if (error) return;
 
-            document.getElementById('totalCount').innerText = data.length;
-            const sumEst = data.reduce((acc, i) => acc + cleanNum(i.vlr_estimado_anual), 0);
-            const sumHom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
-            document.getElementById('totalValue').innerText = formatBRL(sumEst);
-            document.getElementById('totalSaving').innerText = formatBRL(sumEst > 0 && sumHom > 0 ? sumEst - sumHom : 0);
+            // Cálculos Unificados via ID SEI
+            document.getElementById('stat_procs').innerText = data.length;
+            const total = data.reduce((acc, i) => acc + (parseFloat(i.vlr_estimado_anual)||0), 0);
+            const homologado = data.reduce((acc, i) => acc + (parseFloat(i.vlr_homologado)||0), 0);
+            document.getElementById('stat_val').innerText = total.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
+            document.getElementById('stat_save').innerText = (homologado > 0 ? total - homologado : 0).toLocaleString('pt-br', {style:'currency', currency:'BRL'});
 
-            const table = document.getElementById('procTable');
+            const table = document.getElementById('mainTable');
             table.innerHTML = data.map(i => {
-                const match = i.observacoes ? i.observacoes.match(/<!--METADATA_DATES:ATIV=(.*)\|FINAL=(.*)-->/) : null;
-                const deadline = match ? match[2] : i.data_prevista;
+                const isOverdue = i.status.includes('Atraso'); // Lógica simplificada para a revisão
                 return `
                 <tr class="hover:bg-white/5 transition">
-                    <td class="px-6 py-4 font-bold text-blue-400">${i.processo_link ? `<a href="${i.processo_link}" target="_blank" class="hover:underline">${i.id_processo}</a>` : i.id_processo}</td>
-                    <td class="px-6 py-4"><div class="font-bold text-slate-100">${i.fase_atual || 'Não Iniciado'}</div><div class="text-[8px] text-slate-500 uppercase">${i.objeto_resumido}</div></td>
-                    <td class="px-6 py-4 text-center"><span class="aging-badge aging-green">No Prazo</span></td>
-                    <td class="px-6 py-4 text-center text-slate-300 font-bold">${formatDate(deadline)}</td>
-                    <td class="px-6 py-4 text-right font-bold text-slate-100">${formatBRL(cleanNum(i.vlr_estimado_anual))}</td>
-                </tr>`;
-            }).join('');
+                    <td class="px-6 py-4 font-black text-blue-400 truncate">
+                        ${i.processo_link ? `<a href="${i.processo_link}" target="_blank" class="hover:underline">${i.id_processo}</a>` : i.id_processo}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-100 truncate">${i.fase_atual || 'Abertura'}</div>
+                        <div class="text-[8px] text-slate-500 uppercase truncate">${i.objeto_resumido}</div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="aging-badge ${isOverdue?'aging-red':'aging-green'}">${isOverdue?'Atrasado':'No Prazo'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center text-slate-300 font-bold">${i.data_prevista ? new Date(i.data_prevista).toLocaleDateString('pt-br') : '--/--/--'}</td>
+                    <td class="px-6 py-4 text-right font-black text-slate-100">R$ ${parseFloat(i.vlr_estimado_anual).toLocaleString('pt-br')}</td>
+                </tr>
+            `}).join('');
         }
-        loadData();
+
+        bootstrap();
     </script>
 </body>
 </html>
