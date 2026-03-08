@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgSUS PCM | Gestão Estratégica</title>
+    <!-- Bibliotecas Prioritárias -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -32,6 +33,7 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .row-hover:hover { background: rgba(255,255,255,0.03); }
         .clickable:hover { transform: translateY(-3px); transition: 0.2s; }
+        #debugArea { background: #1e1e1e; color: #50fa7b; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 10px; margin-bottom: 20px; border: 1px solid #333; display: none; }
     </style>
 </head>
 <body>
@@ -42,6 +44,7 @@
     </aside>
 
     <main class="main-content">
+        <div id="debugArea"></div>
         <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
             <div class="w-full">
                 <p class="text-[10px] font-medium text-blue-400 uppercase tracking-[0.3em] mb-1">AgSUS PCM SaaS</p>
@@ -50,7 +53,6 @@
             <button onclick="location.href='novo-processo.html'" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">+ Novo Processo</button>
         </header>
 
-        <!-- INDICADORES -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             <div class="glass-card p-6 clickable" onclick="filterByField('fase', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
             <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
@@ -58,7 +60,6 @@
             <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
         </div>
 
-        <!-- FILTROS -->
         <div class="glass-card p-4 rounded-2xl mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
             <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar objeto ou ID..." class="form-input bg-slate-800/40">
             <select id="f-prazo" onchange="runFilters()" class="form-input"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
@@ -69,7 +70,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <!-- TABELA -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="glass-card overflow-hidden h-fit">
                     <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
@@ -93,9 +93,8 @@
                 </div>
             </div>
 
-            <!-- ANALYTICS -->
             <div class="space-y-6">
-                <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-6 tracking-widest text-center">Carga da Equipe Ativa</h3><canvas id="chartResp"></canvas></div>
+                <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-6 tracking-widest text-center">Carga Equipe Ativa</h3><canvas id="chartResp"></canvas></div>
                 <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-blue-400 mb-6 tracking-widest text-center">Modalidades</h3><canvas id="chartMod"></canvas></div>
                 <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-emerald-400 mb-6 tracking-widest text-center">Saúde dos Prazos</h3><canvas id="chartStatus"></canvas></div>
             </div>
@@ -103,7 +102,7 @@
         <div class="h-20"></div>
     </main>
 
-    <!-- MODAL DETALHES -->
+    <!-- MODAIS -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
             <div id="modalContent" class="p-8 space-y-4"></div>
@@ -114,10 +113,9 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR -->
     <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest text-white">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
             <form id="editForm" class="p-8 space-y-4">
                 <input type="hidden" id="edit_id_pk">
                 <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ID Processo (SEI)</label><input type="text" id="edit_proc_id" readonly class="form-input opacity-50"></div>
@@ -145,8 +143,15 @@
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
             { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
             { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
+
+        function logDebug(msg) { 
+            const da = document.getElementById('debugArea');
+            da.style.display = 'block';
+            da.innerHTML += `<div>> ${msg}</div>`;
+        }
 
         function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
         function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
@@ -163,18 +168,24 @@
         }
 
         async function init() {
-            const nav = document.getElementById('globalNav');
-            nav.innerHTML = menuItems.map(m => `<div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
-            const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
-            const { data: equipe } = await sb.from('equipe').select('*').order('nome');
-            globalEtapas = etapas || []; globalEquipe = equipe || [];
-            globalEtapas.forEach(e => document.getElementById('f-fase').add(new Option(e.descricao, e.descricao)));
-            globalEquipe.forEach(r => document.getElementById('f-responsavel').add(new Option(r.nome, r.nome)));
-            const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
-            rawData = data || [];
-            updateView(rawData);
-            const getUnique = (key) => [...new Set(rawData.map(i => i[key]).filter(Boolean))].sort();
-            getUnique('modalidade').forEach(v => document.getElementById('f-modalidade').add(new Option(v, v)));
+            try {
+                const nav = document.getElementById('globalNav');
+                nav.innerHTML = menuItems.map(m => `<div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
+
+                const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
+                const { data: equipe } = await sb.from('equipe').select('*').order('nome');
+                globalEtapas = etapas || []; globalEquipe = equipe || [];
+                globalEtapas.forEach(e => document.getElementById('f-fase').add(new Option(e.descricao, e.descricao)));
+                globalEquipe.forEach(r => document.getElementById('f-responsavel').add(new Option(r.nome, r.nome)));
+
+                const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
+                if (error) { logDebug("Erro banco: " + error.message); return; }
+                rawData = data || [];
+                updateView(rawData);
+
+                const getUnique = (key) => [...new Set(rawData.map(i => i[key]).filter(Boolean))].sort();
+                getUnique('modalidade').forEach(v => document.getElementById('f-modalidade').add(new Option(v, v)));
+            } catch (err) { logDebug("Erro Init: " + err.message); }
         }
 
         function runFilters() {
@@ -198,8 +209,10 @@
             updateView(filtered);
         }
 
-        function filterByField(field, value) { document.getElementById(`f-${field}`).value = value; runFilters(); }
-        function clearAllFilters() { document.getElementById('searchBox').value = ''; document.getElementById('f-prazo').value = 'Todos'; document.getElementById('f-responsavel').value = 'Todos'; document.getElementById('f-modalidade').value = 'Todos'; document.getElementById('f-fase').value = 'Todos'; runFilters(); }
+        function filterByField(field, value) { 
+            const el = document.getElementById(`f-${field}`);
+            if(el) { el.value = value; runFilters(); }
+        }
 
         function updateView(data) {
             const ativos = data.filter(i => i.fase_atual !== 'Concluído');
@@ -215,9 +228,8 @@
             const table = document.getElementById('mainTable');
             table.innerHTML = data.map(i => {
                 const aging = getAging(i.data_prevista, i.fase_atual);
-                const linkIcon = i.processo_link ? `<svg class="w-3 h-3 inline text-blue-500 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>` : '';
-                const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="hover:underline hover:text-blue-300 transition">${i.id_processo}${linkIcon}</a>` : i.id_processo;
-                return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')"><td class="p-4 font-black text-blue-400 truncate">${processIdHtml}</td><td class="p-4"><div class="font-bold text-slate-100">${i.fase_atual || 'N/I'}</div><div class="text-[8px] text-slate-500 uppercase truncate max-w-[200px]">${i.objeto_resumido}</div></td><td class="p-4 text-center"><span class="aging-badge ${aging.class}">${aging.label}</span></td><td class="p-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td><td class="p-4 text-center"><div class="flex justify-center gap-3"><button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td></tr>`;
+                const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
+                return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')"><td class="p-4 font-black">${processIdHtml}</td><td class="p-4"><div class="font-bold text-slate-100">${i.fase_atual || 'N/I'}</div><div class="text-[8px] text-slate-500 uppercase truncate max-w-[200px]">${i.objeto_resumido}</div></td><td class="p-4 text-center"><span class="aging-badge ${aging.class}">${aging.label}</span></td><td class="p-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td><td class="p-4 text-center"><div class="flex justify-center gap-3"><button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td></tr>`;
             }).join('');
             renderCharts(ativos);
         }
@@ -225,8 +237,7 @@
         function renderCharts(data) {
             const countBy = (k) => data.reduce((a, i) => { let v = i[k]||'N/I'; a[v]=(a[v]||0)+1; return a; }, {});
             if(charts.mod) charts.mod.destroy();
-            const modData = countBy('modalidade');
-            charts.mod = new Chart(document.getElementById('chartMod'), { type: 'doughnut', data: { labels: Object.keys(modData), datasets: [{ data: Object.values(modData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('modalidade', Object.keys(modData)[activeEls[0].index]); }, plugins: { legend: { display: false } } } });
+            charts.mod = new Chart(document.getElementById('chartMod'), { type: 'doughnut', data: { labels: Object.keys(countBy('modalidade')), datasets: [{ data: Object.values(countBy('modalidade')), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('modalidade', Object.keys(countBy('modalidade'))[activeEls[0].index]); }, plugins: { legend: { display: false } } } });
             if(charts.resp) charts.resp.destroy();
             const resData = countBy('responsavel');
             const sortedLabels = Object.keys(resData).sort((a,b) => (a==='N/I'?1:b==='N/I'?-1:resData[b]-resData[a]));
@@ -254,25 +265,11 @@
 
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSave');
-            btn.innerText = "SALVANDO...";
-            btn.disabled = true;
             try {
-                const payload = { 
-                    objeto_resumido: document.getElementById('edit_objeto').value, 
-                    processo_link: document.getElementById('edit_link').value, 
-                    responsavel: document.getElementById('edit_resp').value, 
-                    fase_atual: document.getElementById('edit_fase').value, 
-                    vlr_estimado_anual: document.getElementById('edit_val').value, 
-                    vlr_homologado: document.getElementById('edit_hom').value 
-                };
+                const payload = { objeto_resumido: document.getElementById('edit_objeto').value, processo_link: document.getElementById('edit_link').value, responsavel: document.getElementById('edit_resp').value, fase_atual: document.getElementById('edit_fase').value, vlr_estimado_anual: document.getElementById('edit_val').value, vlr_homologado: document.getElementById('edit_hom').value };
                 await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
                 location.reload();
-            } catch (err) {
-                alert("Erro ao salvar.");
-                btn.innerText = "SALVAR ALTERAÇÕES";
-                btn.disabled = false;
-            }
+            } catch (err) { alert("Erro ao salvar."); }
         }
 
         function openDetails(id) {
