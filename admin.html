@@ -10,10 +10,10 @@
     <style>
         :root { --glass: rgba(30, 41, 59, 0.7); }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-        @media (min-width: 1024px) { body { flex-direction: row; overflow: hidden; } }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
         .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
-        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; overflow-x: auto; }
-        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; overflow-x: hidden; } }
+        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; }
+        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; position: sticky; top: 0; } }
         
         .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 16px; color: #64748b; transition: all 0.3s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
