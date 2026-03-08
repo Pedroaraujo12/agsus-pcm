@@ -11,7 +11,7 @@
         :root { --glass: rgba(15, 23, 42, 0.9); --accent: #3b82f6; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
-        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; color: white; font-size: 13px; outline: none; width: 100%; transition: border 0.2s; }
+        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; color: white; font-size: 13px; outline: none; width: 100%; transition: all 0.2s; }
         .input-base:focus { border-color: var(--accent); }
         label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
         .btn-primary { background: var(--accent); color: white; padding: 14px; border-radius: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; transition: 0.2s; width: 100%; }
@@ -25,7 +25,7 @@
         <div class="bg-blue-600 p-8 flex justify-between items-center text-white">
             <div>
                 <h1 class="text-2xl font-black uppercase tracking-tight">Protocolar Processo</h1>
-                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mt-1">Cálculo de SLA Ativo</p>
+                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mt-1">Módulo de Entrada AgSUS</p>
             </div>
             <button onclick="location.href='index.html'" class="text-white/50 hover:text-white transition text-2xl">&times;</button>
         </div>
@@ -53,13 +53,19 @@
                 </div>
             </div>
 
+            <!-- NOVO CAMPO: LINK DO PROCESSO SEI -->
+            <div>
+                <label>Link de Acesso (SEI / Documento Externo)</label>
+                <input type="url" id="processo_link" placeholder="https://sei.agsus.gov.br/..." class="input-base">
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label>Data de Recebimento (Início Prazo)</label>
+                    <label>Data de Recebimento</label>
                     <input type="date" id="data_recebimento" required class="input-base">
                 </div>
                 <div>
-                    <label>Data de Entrada (Protocolo)</label>
+                    <label>Data de Entrada</label>
                     <input type="date" id="data_entrada" required class="input-base">
                 </div>
             </div>
@@ -78,7 +84,7 @@
                     </select>
                 </div>
                 <div>
-                    <label>Valor Estimado (R$)</label>
+                    <label>Valor Estimado</label>
                     <input type="number" id="vlr_estimado" step="0.01" class="input-base">
                 </div>
             </div>
@@ -92,7 +98,6 @@
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Definir data de hoje como padrão
         document.getElementById('data_recebimento').valueAsDate = new Date();
         document.getElementById('data_entrada').valueAsDate = new Date();
 
@@ -116,6 +121,7 @@
                 objeto_resumido: document.getElementById('objeto_resumido').value,
                 responsavel: document.getElementById('responsavel').value,
                 fase_atual: document.getElementById('fase_atual').value,
+                processo_link: document.getElementById('processo_link').value,
                 data_recebimento: document.getElementById('data_recebimento').value,
                 data_entrada: document.getElementById('data_entrada').value,
                 demandante: document.getElementById('demandante').value,
