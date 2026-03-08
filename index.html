@@ -9,35 +9,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(15, 23, 42, 0.8); --accent: #3b82f6; }
+        :root { --glass: rgba(15, 23, 42, 0.85); --accent: #3b82f6; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         @media (min-width: 1024px) { body { flex-direction: row; } }
         
         .glass-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; }
         
-        /* SIDEBAR PREMIUM */
         .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; background: #0f172a; }
         @media (min-width: 1024px) { .sidebar { width: 72px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; } }
         
         .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 12px; color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); transform: scale(1.05); }
+        .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
         
-        /* TOOLTIPS (LEGENDAS) PROFISSIONAIS */
-        .nav-item .tooltip {
-            visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: all 0.2s ease; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); letter-spacing: 0.05em;
-        }
-        @media (min-width: 1024px) { .nav-item .tooltip { left: 140%; top: 50%; transform: translateY(-50%) translateX(-10px); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; transform: translateY(-50%) translateX(0px); } }
-        @media (max-width: 1023px) { .nav-item .tooltip { bottom: 130%; left: 50%; transform: translateX(-50%) translateY(10px); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0px); } }
+        .nav-item .tooltip { visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: all 0.2s ease; pointer-events: none; }
+        @media (min-width: 1024px) { .nav-item .tooltip { left: 140%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
 
         .main-content { flex: 1; padding: 24px; overflow-y: auto; height: 100vh; }
-        .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        .status-badge { font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        .aging-badge { font-size: 8px; padding: 3px 8px; border-radius: 4px; font-weight: 900; text-transform: uppercase; }
         
-        /* SHADCN-LIKE ELEMENTS */
         .btn-primary { background: var(--accent); color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; transition: all 0.2s; display: inline-flex; items-center; gap: 8px; }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; color: white; font-size: 13px; outline: none; transition: border 0.2s; }
-        .input-base:focus { border-color: var(--accent); }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; color: white; font-size: 13px; outline: none; transition: border 0.2s; width: 100%; }
         
+        .clickable-card { cursor: pointer; transition: transform 0.2s; }
+        .clickable-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
@@ -45,89 +42,96 @@
 <body>
 
     <aside class="sidebar">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-125">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-125"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <nav id="globalNav" class="flex flex-row lg:flex-col"></nav>
     </aside>
 
     <main class="main-content">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Dashboard PCM</h1>
-                <p class="text-slate-400 text-xs font-medium uppercase tracking-[0.2em] mt-1">Coordenação de Compras • AgSUS</p>
+                <h1 class="text-3xl font-black tracking-tight uppercase italic">Dashboard PCM</h1>
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">Gestão Estratégica AgSUS</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="location.href='novo-processo.html'" class="btn-primary">+ Novo Processo</button>
+                <button onclick="location.reload()" class="input-base px-6 font-bold uppercase text-[10px]">Sincronizar</button>
+                <button onclick="location.href='novo-processo.html'" class="btn-primary">+ Novo Registro</button>
             </div>
         </header>
 
-        <!-- KPI GRID -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="glass-card p-6 border-l-4 border-blue-500">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Processos Ativos</p>
-                <h3 id="stat_procs" class="text-3xl font-black italic tracking-tighter">--</h3>
+            <div class="glass-card p-6 border-l-4 border-blue-500 clickable-card" onclick="filterByPrazo('Todos')">
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos</p>
+                <h3 id="stat_procs" class="text-3xl font-black">--</h3>
             </div>
             <div class="glass-card p-6 border-l-4 border-indigo-500">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Estimado</p>
+                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Estimado</p>
                 <h3 id="stat_val" class="text-xl font-black">R$ 0,00</h3>
             </div>
             <div class="glass-card p-6 border-l-4 border-emerald-500">
-                <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Savings Realizado</p>
+                <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Savings</p>
                 <h3 id="stat_save" class="text-xl font-black text-emerald-400">R$ 0,00</h3>
             </div>
-            <div class="glass-card p-6 border-l-4 border-red-500">
-                <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Alertas / Atrasos</p>
-                <h3 id="stat_delay" class="text-3xl font-black text-red-400">--</h3>
+            <div class="glass-card p-6 border-l-4 border-red-500 clickable-card" onclick="filterByPrazo('Atrasados')">
+                <p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p>
+                <h3 id="stat_delay" class="text-3xl font-black text-red-100">--</h3>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- TABELA DINÂMICA -->
             <div class="lg:col-span-2 space-y-4">
                 <div class="glass-card p-4 flex flex-wrap gap-3">
-                    <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Filtrar por ID ou Objeto..." class="input-base flex-1 min-w-[200px]">
-                    <select id="f-fase" onchange="runFilters()" class="input-base min-w-[150px]"><option value="Todos">Todas as Etapas</option></select>
-                    <select id="f-responsavel" onchange="runFilters()" class="input-base min-w-[150px]"><option value="Todos">Responsáveis</option></select>
+                    <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="ID ou Objeto..." class="input-base flex-1 min-w-[150px]">
+                    <select id="f-fase" onchange="runFilters()" class="input-base min-w-[150px]"><option value="Todos">Etapa (SLA)</option></select>
+                    <select id="f-responsavel" onchange="runFilters()" class="input-base min-w-[150px]"><option value="Todos">Responsável</option></select>
+                    <button onclick="clearAllFilters()" class="text-[9px] font-black text-slate-500 hover:text-white uppercase px-2">Limpar</button>
                 </div>
                 
                 <div class="glass-card overflow-hidden">
-                    <div class="overflow-x-auto p-2">
-                        <table class="w-full text-left border-separate border-spacing-y-2">
-                            <thead>
-                                <tr class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4">
-                                    <th class="pb-4 pl-4">ID Processo</th>
-                                    <th class="pb-4">Etapa / Status</th>
-                                    <th class="pb-4 text-center">Prazo</th>
-                                    <th class="pb-4 text-right pr-4">Valor Est.</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mainTable" class="text-[11px]"></tbody>
+                    <div class="p-4 border-b border-white/5 flex justify-between items-center"><h2 class="text-[10px] font-black uppercase text-slate-400">Fluxo de Execução</h2><span id="rowCount" class="text-[9px] bg-slate-800 px-2 py-1 rounded text-slate-500 font-black italic"></span></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-900/50"><tr class="text-[9px] font-black uppercase text-slate-500"><th class="p-4">ID Processo</th><th>Etapa / Objeto</th><th class="text-center">SLA</th><th class="text-right">Estimado</th><th class="text-center">Ações</th></tr></thead>
+                            <tbody id="mainTable" class="text-[10px] divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ANALYTICS -->
             <div class="space-y-6">
-                <div class="glass-card p-6">
-                    <h3 class="text-xs font-bold uppercase text-slate-400 mb-6">Carga por Responsável</h3>
-                    <div class="h-[200px]"><canvas id="chartResponsavel"></canvas></div>
-                </div>
-                <div class="glass-card p-6">
-                    <h3 class="text-xs font-bold uppercase text-slate-400 mb-6">Saúde dos Prazos (SLA)</h3>
-                    <div class="h-[200px]"><canvas id="chartStatus"></canvas></div>
-                </div>
+                <div class="glass-card p-6 h-[230px]"><h3 class="text-[10px] font-black uppercase text-slate-500 mb-4">Saúde dos Prazos</h3><canvas id="chartStatus"></canvas></div>
+                <div class="glass-card p-6 h-[230px]"><h3 class="text-[10px] font-black uppercase text-slate-500 mb-4">Modalidades</h3><canvas id="chartMod"></canvas></div>
+                <div class="glass-card p-6 h-[230px]"><h3 class="text-[10px] font-black uppercase text-slate-500 mb-4">Carga da Equipe</h3><canvas id="chartResp"></canvas></div>
             </div>
         </div>
     </main>
 
+    <!-- MODAL EDITAR -->
+    <div id="modalEdit" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden z-[250] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg shadow-2xl border border-white/10 overflow-hidden">
+            <div class="bg-blue-600 p-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl">&times;</button></div>
+            <form id="editForm" class="p-8 space-y-4">
+                <input type="hidden" id="edit_id_pk">
+                <div><label class="text-[9px] font-black text-slate-500 uppercase mb-1">Objeto</label><textarea id="edit_objeto" rows="2" class="input-base"></textarea></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase mb-1">Responsável</label><select id="edit_resp" class="input-base"></select></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase mb-1">Etapa Atual</label><select id="edit_fase" class="input-base"></select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase mb-1">Estimado</label><input type="number" step="0.01" id="edit_val" class="input-base"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase mb-1">Homologado</label><input type="number" step="0.01" id="edit_hom" class="input-base"></div>
+                </div>
+                <button type="submit" class="w-full btn-primary py-4 mt-2">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL DETALHES -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-xl shadow-2xl border border-white/10 overflow-hidden">
-            <div class="p-8 space-y-6" id="detailsContent"></div>
+            <div class="p-8" id="detContent"></div>
             <div class="p-6 border-t border-white/5 flex justify-end gap-3">
-                <button onclick="closeDetails()" class="input-base hover:bg-slate-800 transition uppercase font-bold text-[10px] px-8">Fechar</button>
+                <button id="btnSEI" class="hidden btn-primary text-[10px]">Abrir no SEI</button>
+                <button onclick="closeDetails()" class="input-base max-w-[100px] text-[10px] font-bold uppercase">Fechar</button>
             </div>
         </div>
     </div>
@@ -136,56 +140,40 @@
         const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        let rawData = [], charts = {}, globalEtapas = [];
+        let rawData = [], charts = {}, globalEtapas = [], globalEquipe = [];
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
             { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
-            { title: 'Editais & PNCP', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
-            { title: 'Fornecedores', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
-            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
-            { title: 'Avaliação', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
-            { title: 'Contratos', icon: '<path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>', link: 'contratos.html' },
-            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>', link: 'pagamentos.html' },
-            { title: 'Relatórios', icon: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path><path d="M14 4v4h4"></path>', link: 'relatorios.html' },
             { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
 
-        function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
-        function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
-
+        function formatBRL(v) { return parseFloat(v||0).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
+        
         function getAging(dateStr) {
             if (!dateStr || dateStr === 'None') return { label: 'N/A', class: 'text-slate-600' };
-            let iso = dateStr; if (dateStr.includes('/')) { const p = dateStr.split('/'); iso = `${p[2]}-${p[1]}-${p[0]}`; }
-            const target = new Date(iso.split('T')[0]); today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(dateStr.includes('/') ? dateStr.split('/').reverse().join('-') : dateStr);
+            const today = new Date(); today.setHours(0,0,0,0);
             const diff = Math.ceil((target - today) / 86400000);
-            if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'text-red-500 font-black' };
-            if (diff <= 2) return { label: `Vence em ${diff}d`, class: 'text-amber-500 font-bold' };
-            return { label: `No Prazo (${diff}d)`, class: 'text-emerald-500' };
+            if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'bg-red-500/10 text-red-500' };
+            if (diff <= 2) return { label: `Alerta ${diff}d`, class: 'bg-amber-500/10 text-amber-500' };
+            return { label: `SLA OK`, class: 'bg-emerald-500/10 text-emerald-500' };
         }
 
         async function init() {
-            // Sidebar Dinâmica com Tooltips Reais
             const nav = document.getElementById('globalNav');
-            nav.innerHTML = menuItems.map(m => `
-                <div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
-                    <span class="tooltip">${m.title}</span>
-                </div>`).join('');
+            nav.innerHTML = menuItems.map(m => `<div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
 
-            // Carregar dados auxiliares
             const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
             const { data: equipe } = await sb.from('equipe').select('*').order('nome');
-            globalEtapas = etapas || [];
+            globalEtapas = etapas || []; globalEquipe = equipe || [];
 
             const fFase = document.getElementById('f-fase');
             globalEtapas.forEach(e => fFase.add(new Option(e.descricao, e.descricao)));
             const fResp = document.getElementById('f-responsavel');
-            equipe.forEach(r => fResp.add(new Option(r.nome, r.nome)));
+            globalEquipe.forEach(r => fResp.add(new Option(r.nome, r.nome)));
 
-            // Carregar Licitacoes
-            const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
+            const { data } = await sb.from('licitacoes').select('*').order('id_processo');
             rawData = data || [];
             updateView(rawData);
         }
@@ -194,92 +182,121 @@
             const s = document.getElementById('searchBox').value.toLowerCase();
             const f = document.getElementById('f-fase').value;
             const r = document.getElementById('f-responsavel').value;
+            const p = document.getElementById('f-prazo')?.value || 'Todos';
 
             const filtered = rawData.filter(i => {
                 if (s && !(String(i.objeto_resumido||"") + String(i.id_processo||"")).toLowerCase().includes(s)) return false;
                 if (f !== 'Todos' && i.fase_atual !== f) return false;
                 if (r !== 'Todos' && i.responsavel !== r) return false;
+                if (p === 'Atrasados' && getAging(i.data_prevista).label.indexOf('Atrasado') === -1) return false;
                 return true;
             });
             updateView(filtered);
         }
 
+        function filterByPrazo(type) {
+            const mock = { value: type };
+            // Lógica interna de filtro por clique no card
+            const filtered = rawData.filter(i => {
+                if(type === 'Atrasados') return getAging(i.data_prevista).label.includes('Atrasado');
+                return true;
+            });
+            updateView(filtered);
+        }
+
+        function clearAllFilters() {
+            document.getElementById('searchBox').value = '';
+            document.getElementById('f-fase').value = 'Todos';
+            document.getElementById('f-responsavel').value = 'Todos';
+            updateView(rawData);
+        }
+
         function updateView(data) {
             document.getElementById('stat_procs').innerText = data.length;
-            const sumEst = data.reduce((acc, i) => acc + cleanNum(i.vlr_estimado_anual), 0);
-            const sumHom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
-            document.getElementById('stat_val').innerText = formatBRL(sumEst);
-            document.getElementById('stat_save').innerText = formatBRL(sumEst - sumHom);
-            
+            document.getElementById('rowCount').innerText = `${data.length} PROCESSOS ENCONTRADOS`;
+            const est = data.reduce((acc, i) => acc + parseFloat(i.vlr_estimado_anual||0), 0);
+            const hom = data.reduce((acc, i) => acc + parseFloat(i.vlr_homologado||0), 0);
+            document.getElementById('stat_val').innerText = formatBRL(est);
+            document.getElementById('stat_save').innerText = formatBRL(est - hom);
+            document.getElementById('stat_delay').innerText = data.filter(i => getAging(i.data_prevista).label.includes('Atrasado')).length;
+
             const table = document.getElementById('mainTable');
             table.innerHTML = data.map(i => {
                 const aging = getAging(i.data_prevista);
+                const linkIcon = i.processo_link ? `<svg class="w-3 h-3 inline text-blue-500 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>` : '';
                 return `
                 <tr class="hover:bg-white/5 transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
-                    <td class="p-4 rounded-l-xl bg-white/[0.02] border-y border-l border-white/5 font-black text-blue-400">${i.id_processo}</td>
-                    <td class="p-4 bg-white/[0.02] border-y border-white/5">
-                        <div class="font-bold text-slate-100">${i.fase_atual || '-'}</div>
-                        <div class="text-[8px] text-slate-500 uppercase tracking-widest truncate max-w-[200px]">${i.objeto_resumido}</div>
+                    <td class="p-4 font-black text-blue-400">${i.id_processo}${linkIcon}</td>
+                    <td class="p-4"><div class="font-bold text-slate-100">${i.fase_atual || '-'}</div><div class="text-[8px] text-slate-500 uppercase tracking-tighter truncate max-w-[250px]">${i.objeto_resumido}</div></td>
+                    <td class="p-4 text-center"><span class="aging-badge ${aging.class}">${aging.label}</span></td>
+                    <td class="p-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td>
+                    <td class="p-4 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                            <button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                        </div>
                     </td>
-                    <td class="p-4 bg-white/[0.02] border-y border-white/5 text-center ${aging.class}">${aging.label}</td>
-                    <td class="p-4 rounded-r-xl bg-white/[0.02] border-y border-r border-white/5 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td>
                 </tr>`;
             }).join('');
-
             renderCharts(data);
         }
 
         function renderCharts(data) {
             const countBy = (k) => data.reduce((a, i) => { let v = i[k]||'N/I'; a[v]=(a[v]||0)+1; return a; }, {});
             
-            // Gráfico Responsável
-            if(charts.resp) charts.resp.destroy();
-            const ctxR = document.getElementById('chartResponsavel').getContext('2d');
-            const resData = countBy('responsavel');
-            charts.resp = new Chart(ctxR, {
-                type: 'bar',
-                data: { labels: Object.keys(resData), datasets: [{ data: Object.values(resData), backgroundColor: '#3b82f6', borderRadius: 6 }] },
-                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 10 } } } } }
+            if(charts.mod) charts.mod.destroy();
+            const modData = countBy('modalidade');
+            charts.mod = new Chart(document.getElementById('chartMod'), {
+                type: 'doughnut', data: { labels: Object.keys(modData), datasets: [{ data: Object.values(modData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b'], borderWidth: 0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 9 }, usePointStyle: true } } } }
             });
 
-            // Gráfico Status
-            if(charts.stat) charts.stat.destroy();
-            const ctxS = document.getElementById('chartStatus').getContext('2d');
-            const statData = countBy('status');
-            charts.stat = new Chart(ctxS, {
-                type: 'doughnut',
-                data: { labels: Object.keys(statData), datasets: [{ data: Object.values(statData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true } } } }
+            if(charts.resp) charts.resp.destroy();
+            const resData = countBy('responsavel');
+            charts.resp = new Chart(document.getElementById('chartResp'), {
+                type: 'bar', data: { labels: Object.keys(resData), datasets: [{ data: Object.values(resData), backgroundColor: '#3b82f6', borderRadius: 4 }] },
+                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } }
             });
+
+            if(charts.stat) charts.stat.destroy();
+            const s = { ok: 0, alert: 0, late: 0 };
+            data.forEach(i => { const l = getAging(i.data_prevista).label; if(l.includes('OK')) s.ok++; else if(l.includes('Alerta')) s.alert++; else s.late++; });
+            charts.stat = new Chart(document.getElementById('chartStatus'), {
+                type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } }
+            });
+        }
+
+        function openEdit(id) {
+            const item = rawData.find(x => x.id_processo === id);
+            const selR = document.getElementById('edit_resp'); selR.innerHTML = ''; globalEquipe.forEach(r => selR.add(new Option(r.nome, r.nome)));
+            const selF = document.getElementById('edit_fase'); selF.innerHTML = ''; globalEtapas.forEach(e => selF.add(new Option(e.descricao, e.descricao)));
+            document.getElementById('edit_id_pk').value = item.id_processo;
+            document.getElementById('edit_objeto').value = item.objeto_resumido;
+            document.getElementById('edit_resp').value = item.responsavel;
+            document.getElementById('edit_fase').value = item.fase_atual;
+            document.getElementById('edit_val').value = item.vlr_estimado_anual;
+            document.getElementById('edit_hom').value = item.vlr_homologado;
+            document.getElementById('modalEdit').classList.remove('hidden');
+        }
+
+        document.getElementById('editForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = { objeto_resumido: document.getElementById('edit_objeto').value, responsavel: document.getElementById('edit_resp').value, fase_atual: document.getElementById('edit_fase').value, vlr_estimado_anual: document.getElementById('edit_val').value, vlr_homologado: document.getElementById('edit_hom').value };
+            await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
+            location.reload();
         }
 
         function openDetails(id) {
             const item = rawData.find(x => x.id_processo === id);
-            document.getElementById('detailsContent').innerHTML = `
-                <div class="space-y-6">
-                    <div class="flex justify-between items-start">
-                        <h2 class="text-2xl font-black text-white uppercase tracking-tight">${item.id_processo}</h2>
-                        <span class="status-badge bg-blue-500/10 text-blue-400 border-blue-500/20">${item.status}</span>
-                    </div>
-                    <div class="glass-card p-6 bg-white/5 border-white/10">
-                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-2">Objeto da Contratação</p>
-                        <p class="text-sm text-slate-100 font-medium leading-relaxed">${item.objeto_resumido}</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p>
-                            <p class="text-sm font-black">${item.responsavel || 'N/I'}</p>
-                        </div>
-                        <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase Atual (SLA)</p>
-                            <p class="text-sm font-black text-indigo-400">${item.fase_atual || 'Não Definida'}</p>
-                        </div>
-                    </div>
-                </div>`;
+            document.getElementById('detContent').innerHTML = `<h2 class="text-2xl font-black mb-4 uppercase">${item.id_processo}</h2><div class="glass-card p-6 bg-white/5 mb-6"><p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-2">Objeto</p><p class="text-sm font-medium leading-relaxed">${item.objeto_resumido}</p></div><div class="grid grid-cols-2 gap-4"><div class="p-4 bg-white/5 rounded-xl"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p><p class="font-black text-xs">${item.responsavel||'N/I'}</p></div><div class="p-4 bg-white/5 rounded-xl"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Status</p><p class="font-black text-xs text-indigo-400">${item.status}</p></div></div>`;
+            const btn = document.getElementById('btnSEI'); if(item.processo_link) { btn.classList.remove('hidden'); btn.onclick = () => window.open(item.processo_link, '_blank'); } else btn.classList.add('hidden');
             document.getElementById('modalDetails').classList.remove('hidden');
         }
+
+        function deleteProc(id) { if(confirm(`Excluir ${id}?`)) { sb.from('licitacoes').delete().eq('id_processo', id).then(() => location.reload()); } }
+        function closeEdit() { document.getElementById('modalEdit').classList.add('hidden'); }
         function closeDetails() { document.getElementById('modalDetails').classList.add('hidden'); }
-        
         window.onload = init;
     </script>
 </body>
