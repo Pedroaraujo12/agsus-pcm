@@ -9,34 +9,47 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); --accent: #3b82f6; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        @media (min-width: 1024px) { body { flex-direction: row; } }
+        :root { --glass: rgba(15, 23, 42, 0.7); --accent: #3b82f6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        @media (min-width: 1024px) { body { flex-direction: row; overflow: hidden; } }
         
         .glass-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
         
+        /* SIDEBAR RESPONSIVA */
         .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); }
         @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; } }
         
-        .nav-item { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 14px; margin-bottom: 12px; color: #64748b; transition: all 0.3s; cursor: pointer; }
+        .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 14px; color: #64748b; transition: all 0.3s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transform: scale(1.05); }
         
-        .nav-item .tooltip { visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: 0.2s; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); letter-spacing: 0.05em; }
-        @media (min-width: 1024px) { .nav-item .tooltip { left: 140%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
+        /* LEGENDAS (TOOLTIPS) - OCULTAS NO MOBILE PARA NÃO QUEBRAR O LAYOUT */
+        @media (min-width: 1024px) {
+            .nav-item .tooltip { visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: 0.2s; pointer-events: none; left: 140%; top: 50%; transform: translateY(-50%); }
+            .nav-item:hover .tooltip { visibility: visible; opacity: 1; }
+        }
 
-        .main-content { flex: 1; padding: 24px; overflow-y: auto; height: 100vh; }
+        .main-content { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
+        @media (min-width: 1024px) { .main-content { padding: 32px; height: 100vh; } }
+
         .status-badge { font-size: 9px; padding: 4px 12px; border-radius: 20px; font-weight: 800; text-transform: uppercase; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-        .aging-badge { font-size: 8px; padding: 4px 10px; border-radius: 6px; font-weight: 900; text-transform: uppercase; }
+        .aging-badge { font-size: 8px; padding: 4px 10px; border-radius: 6px; font-weight: 900; text-transform: uppercase; white-space: nowrap; }
 
         .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; font-size: 12px; transition: 0.2s; }
         .form-input:focus { border-color: var(--accent); background: rgba(15, 23, 42, 0.8); }
         
+        /* CONTÊINER DE TABELA RESPONSIVO */
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; min-width: 800px; }
+
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         
         .row-hover:hover { background: rgba(255,255,255,0.03); }
         .clickable { cursor: pointer; transition: 0.2s; }
         .clickable:hover { transform: translateY(-3px); }
+        
+        /* AJUSTES PARA CHART RESPONSIVENESS */
+        .chart-container { position: relative; height: 220px; width: 100%; }
     </style>
 </head>
 <body class="flex">
@@ -49,24 +62,26 @@
 
     <main class="main-content">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
-            <div>
+            <div class="w-full">
                 <p class="text-[10px] font-medium text-blue-400 uppercase tracking-[0.3em] mb-1">AgSUS PCM SaaS</p>
-                <h1 class="text-4xl font-black uppercase tracking-tight leading-none">Fluxo de Execução</h1>
+                <h1 class="text-3xl md:text-4xl font-black uppercase tracking-tight leading-none">Fluxo de Execução</h1>
             </div>
-            <div class="flex gap-3">
-                <button onclick="location.href='novo-processo.html'" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">+ Novo Processo</button>
+            <div class="flex gap-3 w-full md:w-auto">
+                <button onclick="location.href='novo-processo.html'" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">+ Novo Registro</button>
             </div>
         </header>
 
+        <!-- INDICADORES -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-6 clickable" onclick="filterByField('prazo', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos</p><h3 id="stat_procs" class="text-3xl font-black">--</h3></div>
-            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-lg font-black truncate">R$ 0,00</h3></div>
-            <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Savings</p><h3 id="stat_save" class="text-lg font-black truncate">R$ 0,00</h3></div>
-            <div class="glass-card p-6 text-red-100 border-l-4 border-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6 clickable" onclick="filterByField('prazo', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos</p><h3 id="stat_procs" class="text-2xl md:text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
+            <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1 text-xs">Savings</p><h3 id="stat_save" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
+            <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-3xl font-black">--</h3></div>
         </div>
 
+        <!-- FILTROS -->
         <div class="glass-card p-4 rounded-2xl mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-            <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar objeto ou ID..." class="form-input bg-slate-800/40">
+            <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar..." class="form-input bg-slate-800/40">
             <select id="f-prazo" onchange="runFilters()" class="form-input"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
             <select id="f-responsavel" onchange="runFilters()" class="form-input"><option value="Todos">Responsável</option></select>
             <select id="f-modalidade" onchange="runFilters()" class="form-input"><option value="Todos">Modalidade</option></select>
@@ -74,20 +89,21 @@
             <button onclick="clearAllFilters()" class="bg-slate-700 text-white rounded-xl px-2 py-1.5 text-[10px] font-bold uppercase">Limpar</button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 glass-card overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
+            <!-- TABELA -->
+            <div class="lg:col-span-2 glass-card overflow-hidden h-fit">
                 <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-                    <h2 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Processos Ativos</h2>
+                    <h2 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Painel Operacional</h2>
                     <span id="rowCount" class="text-[9px] font-bold bg-slate-800 px-3 py-1 rounded-full text-slate-500">-- processos</span>
                 </div>
-                <div class="table-container p-4">
+                <div class="table-container p-2">
                     <table class="w-full text-left">
                         <thead>
                             <tr class="text-[9px] font-black uppercase text-slate-500 tracking-tighter border-b border-white/10">
-                                <th class="w-[18%] pb-4 pl-2">ID Processo</th>
+                                <th class="w-[18%] pb-4 pl-4">ID Processo</th>
                                 <th class="w-[28%] pb-4">Etapa / Status</th>
-                                <th class="w-[18%] pb-4 text-center">Prazo SLA</th>
-                                <th class="w-[18%] pb-4 text-right">Valor Est.</th>
+                                <th class="w-[18%] pb-4 text-center">SLA</th>
+                                <th class="w-[18%] pb-4 text-right">Estimado</th>
                                 <th class="w-[18%] pb-4 text-center">Ações</th>
                             </tr>
                         </thead>
@@ -96,17 +112,19 @@
                 </div>
             </div>
 
+            <!-- GRÁFICOS -->
             <div class="space-y-6">
-                <div class="glass-card p-6 h-[240px]"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-4 tracking-widest">Responsáveis</h3><canvas id="chartResp"></canvas></div>
-                <div class="glass-card p-6 h-[240px]"><h3 class="text-[10px] font-black uppercase text-blue-400 mb-4 tracking-widest">Modalidades</h3><canvas id="chartMod"></canvas></div>
-                <div class="glass-card p-6 h-[240px]"><h3 class="text-[10px] font-black uppercase text-emerald-400 mb-4 tracking-widest">Saúde dos Prazos</h3><canvas id="chartStatus"></canvas></div>
+                <div class="glass-card p-6 chart-container"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-4 tracking-widest text-center">Responsáveis</h3><canvas id="chartResp"></canvas></div>
+                <div class="glass-card p-6 chart-container"><h3 class="text-[10px] font-black uppercase text-blue-400 mb-4 tracking-widest text-center">Modalidades</h3><canvas id="chartMod"></canvas></div>
+                <div class="glass-card p-6 chart-container"><h3 class="text-[10px] font-black uppercase text-emerald-400 mb-4 tracking-widest text-center">Saúde dos Prazos</h3><canvas id="chartStatus"></canvas></div>
             </div>
         </div>
     </main>
 
+    <!-- MODAL DETALHES -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
-            <div id="modalContent" class="p-8 space-y-4"></div>
+            <div id="modalContent" class="p-8 space-y-4 max-h-[70vh] overflow-y-auto"></div>
             <div class="px-8 py-4 border-t border-white/5 text-right shrink-0 flex gap-2 justify-end">
                 <button id="btnSEI" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl text-[10px] font-bold border border-white/10 transition">Abrir SEI</button>
                 <button onclick="closeDetails()" class="bg-slate-800 text-white px-8 py-2 rounded-xl text-[10px] font-bold border border-white/10">Fechar</button>
@@ -114,20 +132,21 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR -->
     <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
-            <form id="editForm" class="p-8 space-y-4">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest text-white">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
+            <form id="editForm" class="p-8 space-y-4 overflow-y-auto max-h-[80vh]">
                 <input type="hidden" id="edit_id_pk">
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ID (Somente Leitura)</label><input type="text" id="edit_proc_id" readonly class="form-input opacity-50"></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ID Processo</label><input type="text" id="edit_proc_id" readonly class="form-input opacity-50"></div>
                 <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Objeto</label><textarea id="edit_objeto" rows="2" class="form-input"></textarea></div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Responsável</label><select id="edit_resp" class="form-input"></select></div>
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fase Atual</label><select id="edit_fase" class="form-input"></select></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Etapa Atual</label><select id="edit_fase" class="form-input"></select></div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_val" class="form-input"></div>
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_hom" class="form-input"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Vlr Estimado</label><input type="number" step="0.01" id="edit_val" class="form-input"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Vlr Homologado</label><input type="number" step="0.01" id="edit_hom" class="form-input"></div>
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
             </form>
@@ -143,7 +162,6 @@
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
             { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
-            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
             { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
 
@@ -156,8 +174,8 @@
             const target = new Date(iso.split('T')[0]); const today = new Date(); today.setHours(0,0,0,0);
             const diff = Math.ceil((target - today) / 86400000);
             if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'bg-red-500/10 text-red-500' };
-            if (diff <= 2) return { label: `Vence em ${diff}d`, class: 'bg-amber-500/10 text-amber-500' };
-            return { label: `No Prazo (${diff}d)`, class: 'bg-emerald-500/10 text-emerald-500' };
+            if (diff <= 2) return { label: `Vence ${diff}d`, class: 'bg-amber-500/10 text-amber-500' };
+            return { label: `SLA OK`, class: 'bg-emerald-500/10 text-emerald-500' };
         }
 
         async function init() {
@@ -241,8 +259,8 @@
                     <td class="p-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td>
                     <td class="p-4 text-center">
                         <div class="flex justify-center gap-3">
-                            <button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1.5 hover:text-blue-400 transition" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                            <button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1.5 hover:text-red-500 transition" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                            <button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                            <button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                         </div>
                     </td>
                 </tr>`;
@@ -253,24 +271,18 @@
         function renderCharts(data) {
             const countBy = (k) => data.reduce((a, i) => { let v = i[k]||'N/I'; a[v]=(a[v]||0)+1; return a; }, {});
             
-            // 1. Modalidades (Doughnut)
             if(charts.mod) charts.mod.destroy();
             const modData = countBy('modalidade');
             charts.mod = new Chart(document.getElementById('chartMod'), {
-                type: 'doughnut', data: { labels: Object.keys(modData), datasets: [{ data: Object.values(modData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'], borderWidth: 0 }] },
+                type: 'doughnut', data: { labels: Object.keys(modData), datasets: [{ data: Object.values(modData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b'], borderWidth: 0 }] },
                 options: { maintainAspectRatio: false, 
                     onClick: (e, activeEls) => { if (activeEls.length > 0) { filterByField('modalidade', Object.keys(modData)[activeEls[0].index]); } },
-                    plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 9 }, usePointStyle: true } } } }
+                    plugins: { legend: { display: false } } }
             });
 
-            // 2. Responsáveis (Bar Horiz)
             if(charts.resp) charts.resp.destroy();
             const resData = countBy('responsavel');
-            const sortedLabels = Object.keys(resData).sort((a, b) => {
-                if (a === 'N/I') return 1;
-                if (b === 'N/I') return -1;
-                return resData[b] - resData[a]; // Ordena por quantidade descendente
-            });
+            const sortedLabels = Object.keys(resData).sort((a,b) => (a==='N/I'?1:b==='N/I'?-1:resData[b]-resData[a]));
             charts.resp = new Chart(document.getElementById('chartResp'), {
                 type: 'bar', data: { labels: sortedLabels, datasets: [{ data: sortedLabels.map(l => resData[l]), backgroundColor: '#3b82f6', borderRadius: 4 }] },
                 options: { indexAxis: 'y', maintainAspectRatio: false, 
@@ -278,7 +290,6 @@
                     plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } }
             });
 
-            // 3. Saúde Prazos (Bar Vert)
             if(charts.stat) charts.stat.destroy();
             const s = { ok: 0, alert: 0, late: 0 };
             data.forEach(i => { const l = getAging(i.data_prevista).label; if(l.includes('OK')) s.ok++; else if(l.includes('Alerta')) s.alert++; else s.late++; });
@@ -306,14 +317,19 @@
 
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
-            const payload = { objeto_resumido: document.getElementById('edit_objeto').value, responsavel: document.getElementById('edit_resp').value, fase_atual: document.getElementById('edit_fase').value, vlr_estimado_anual: document.getElementById('edit_val').value, vlr_homologado: document.getElementById('edit_hom').value };
-            await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
+            await sb.from('licitacoes').update({ 
+                objeto_resumido: document.getElementById('edit_objeto').value, 
+                responsavel: document.getElementById('edit_resp').value, 
+                fase_atual: document.getElementById('edit_fase').value, 
+                vlr_estimado_anual: document.getElementById('edit_val').value, 
+                vlr_homologado: document.getElementById('edit_hom').value 
+            }).eq('id_processo', document.getElementById('edit_id_pk').value);
             location.reload();
         }
 
         function openDetails(id) {
             const item = rawData.find(x => x.id_processo === id);
-            document.getElementById('modalContent').innerHTML = `<div class="flex justify-between items-start mb-6"><h2 class="text-2xl font-black text-white uppercase tracking-tight">${item.id_processo}</h2><span class="status-badge">${item.status}</span></div><div class="glass-card p-6 bg-white/5 border-white/10 mb-6"><p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Objeto da Contratação</p><p class="text-sm font-medium leading-relaxed text-slate-100">${item.objeto_resumido}</p></div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl bg-white/5 border border-white/10"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p><p class="font-black text-xs">${item.responsavel||'N/I'}</p></div><div class="p-4 rounded-xl bg-white/5 border border-white/10"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase SLA</p><p class="font-black text-xs text-indigo-400">${item.fase_atual||'N/I'}</p></div></div>`;
+            document.getElementById('modalContent').innerHTML = `<h2 class="text-2xl font-black mb-4 uppercase text-white">${item.id_processo}</h2><div class="glass-card p-6 bg-white/5 border-white/10 mb-6"><p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Objeto</p><p class="text-sm font-medium leading-relaxed">${item.objeto_resumido}</p></div><div class="grid grid-cols-2 gap-4"><div class="p-4 bg-white/5 rounded-xl border border-white/5"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p><p class="font-black text-xs">${item.responsavel||'N/I'}</p></div><div class="p-4 bg-white/5 rounded-xl border border-white/5"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase SLA</p><p class="font-black text-xs text-indigo-400">${item.fase_atual||'N/I'}</p></div></div>`;
             const btn = document.getElementById('btnSEI'); if(item.processo_link) { btn.classList.remove('hidden'); btn.onclick = () => window.open(item.processo_link, '_blank'); } else btn.classList.add('hidden');
             document.getElementById('modalDetails').classList.remove('hidden');
         }
