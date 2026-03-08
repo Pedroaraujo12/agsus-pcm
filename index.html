@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgSUS PCM | Gestão de Compras</title>
-    <!-- Bibliotecas Prioritárias -->
+    <!-- Carregamento Prioritário das Bibliotecas -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,59 +17,11 @@
         .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; overflow-x: auto; }
         @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; overflow-x: hidden; } }
         
-        /* NOVO SISTEMA DE LEGENDAS (TOOLTIPS) - CSS PURO PARA GARANTIR FUNCIONAMENTO */
+        /* TOOLTIPS */
         .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 12px; color: #64748b; transition: all 0.3s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        
-        /* A Legenda (Tooltip) */
-        .nav-item .tooltip-text {
-            visibility: hidden;
-            position: absolute;
-            background-color: #1e293b;
-            color: #fff;
-            text-align: center;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            white-space: nowrap;
-            border: 1px solid rgba(255,255,255,0.1);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            letter-spacing: 0.05em;
-            pointer-events: none;
-        }
-
-        /* Posicionamento Desktop (Direita) */
-        @media (min-width: 1024px) {
-            .nav-item .tooltip-text {
-                left: 120%;
-                top: 50%;
-                transform: translateY(-50%) translateX(-10px);
-            }
-            .nav-item:hover .tooltip-text {
-                visibility: visible;
-                opacity: 1;
-                transform: translateY(-50%) translateX(0px);
-            }
-        }
-
-        /* Posicionamento Mobile (Cima) */
-        @media (max-width: 1023px) {
-            .nav-item .tooltip-text {
-                bottom: 120%;
-                left: 50%;
-                transform: translateX(-50%) translateY(10px);
-            }
-            .nav-item:hover .tooltip-text {
-                visibility: visible;
-                opacity: 1;
-                transform: translateX(-50%) translateY(0px);
-            }
-        }
+        .nav-item .tooltip-text { visibility: hidden; position: absolute; background-color: #1e293b; color: #fff; text-align: center; padding: 8px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        @media (min-width: 1024px) { .nav-item .tooltip-text { left: 120%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip-text { visibility: visible; opacity: 1; } }
 
         .main-container { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
         @media (min-width: 1024px) { .main-container { padding: 32px; height: 100vh; } }
@@ -102,9 +54,7 @@
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50">
-            <div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div>
-        </div>
+        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
     </aside>
 
     <main class="main-container">
@@ -126,12 +76,13 @@
             <div class="glass-card p-6 rounded-[1.5rem] border-l-4 border-l-red-500 text-red-100 clickable-stat" onclick="filterByStat('Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Em Atraso</p><h3 id="stat_delay" class="text-3xl font-black">--</h3></div>
         </div>
 
+        <!-- FILTROS DINÂMICOS CONECTADOS AO ADMIN -->
         <div class="glass-card p-4 rounded-2xl mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
             <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar..." class="filter-select bg-slate-800/40">
             <select id="f-prazo" onchange="runFilters()" class="filter-select"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
             <select id="f-responsavel" onchange="runFilters()" class="filter-select"><option value="Todos">Responsável</option></select>
             <select id="f-modalidade" onchange="runFilters()" class="filter-select"><option value="Todos">Modalidade</option></select>
-            <select id="f-fase" onchange="runFilters()" class="filter-select"><option value="Todos">Fase</option></select>
+            <select id="f-fase" onchange="runFilters()" class="filter-select"><option value="Todos">Etapa (SLA)</option></select>
             <button onclick="clearAllFilters()" class="bg-slate-700 text-white rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase">Limpar</button>
         </div>
 
@@ -190,7 +141,7 @@
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status</label><select id="edit_proc_status" class="form-input"><option>Não recebido</option><option>Em análise</option><option>Em elaboração</option><option>Publicado</option><option>Homologado</option><option>Cancelado</option></select></div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fase Atual</label><input type="text" id="edit_proc_fase" class="form-input"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fase Atual (SLA)</label><select id="edit_proc_fase" class="form-input"></select></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_proc_val" class="form-input"></div>
                 </div>
                 <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_proc_hom" class="form-input"></div>
@@ -207,8 +158,7 @@
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        let rawData = [], charts = {};
-        const responsaveisPlanilha = ["Karla Oliveira", "Pedro", "Thiago", "Viviane", "Vivian", "Gorete Pereira"];
+        let rawData = [], charts = {}, globalEtapas = [];
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
@@ -321,24 +271,41 @@
         function openEditProcess(id) {
             const item = rawData.find(x => String(x.id_processo) === String(id));
             if (!item) return;
+
+            // Popular Responsáveis
             const selResp = document.getElementById('edit_proc_resp');
-            selResp.innerHTML = '';
+            selResp.innerHTML = '<option value="">Sem Responsável</option>';
+            // Tentaremos buscar da lista real se carregada, senão da fallback
             responsaveisPlanilha.forEach(r => selResp.add(new Option(r, r)));
+
+            // Popular Fases do Admin
+            const selFase = document.getElementById('edit_proc_fase');
+            selFase.innerHTML = '<option value="">Sem Etapa</option>';
+            globalEtapas.forEach(e => selFase.add(new Option(e.descricao, e.descricao)));
+
             document.getElementById('edit_proc_id_pk').value = item.id_processo;
             document.getElementById('edit_proc_id').value = item.id_processo;
             document.getElementById('edit_proc_objeto').value = item.objeto_resumido || '';
             document.getElementById('edit_proc_status').value = item.status || 'Não recebido';
-            document.getElementById('edit_proc_fase').value = item.fase_atual || '';
             document.getElementById('edit_proc_val').value = cleanNum(item.vlr_estimado_anual);
             document.getElementById('edit_proc_hom').value = cleanNum(item.vlr_homologado);
-            document.getElementById('edit_proc_resp').value = item.responsavel || "Pedro";
+            document.getElementById('edit_proc_resp').value = item.responsavel || "";
+            document.getElementById('edit_proc_fase').value = item.fase_atual || "";
+
             document.getElementById('modalEditProcess').classList.remove('hidden');
         }
 
         document.getElementById('processEditForm').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit_proc_id_pk').value;
-            const payload = { objeto_resumido: document.getElementById('edit_proc_objeto').value, status: document.getElementById('edit_proc_status').value, fase_atual: document.getElementById('edit_proc_fase').value, vlr_estimado_anual: document.getElementById('edit_proc_val').value, vlr_homologado: document.getElementById('edit_proc_hom').value, responsavel: document.getElementById('edit_proc_resp').value };
+            const payload = { 
+                objeto_resumido: document.getElementById('edit_proc_objeto').value, 
+                status: document.getElementById('edit_proc_status').value, 
+                fase_atual: document.getElementById('edit_proc_fase').value, 
+                vlr_estimado_anual: document.getElementById('edit_proc_val').value, 
+                vlr_homologado: document.getElementById('edit_proc_hom').value, 
+                responsavel: document.getElementById('edit_proc_resp').value 
+            };
             const { error } = await sb.from('licitacoes').update(payload).eq('id_processo', id);
             if(!error) location.reload();
             else alert("Erro ao salvar: " + error.message);
@@ -348,7 +315,7 @@
 
         async function init() {
             try {
-                // Sidebar robusta com legenda HTML real
+                // Sidebar
                 const nav = document.getElementById('globalNav'); 
                 if(nav) {
                     nav.innerHTML = menuItems.map(m => `
@@ -358,11 +325,34 @@
                         </div>`).join('');
                 }
 
+                // Carregar Dados Admin (Etapas e Equipe) para Filtros e Modais
+                const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
+                const { data: equipe } = await sb.from('equipe').select('*').order('nome');
+                globalEtapas = etapas || [];
+
+                // Preencher Filtro de Fase com dados do Admin
+                const fFase = document.getElementById('f-fase');
+                if(fFase && globalEtapas.length > 0) {
+                    fFase.innerHTML = '<option value="Todos">Etapa (SLA)</option>';
+                    globalEtapas.forEach(e => fFase.add(new Option(e.descricao, e.descricao)));
+                }
+
+                // Preencher Filtro de Responsável com dados do Admin
+                const fResp = document.getElementById('f-responsavel');
+                if(fResp && equipe) {
+                    fResp.innerHTML = '<option value="Todos">Responsável</option>';
+                    equipe.forEach(r => fResp.add(new Option(r.nome, r.nome)));
+                }
+
+                // Carregar Licitacoes
                 const { data, error } = await sb.from('licitacoes').select('*').order('id_processo'); if (error) throw error;
                 rawData = data || [];
+                
+                // Preencher outros filtros (Modalidade)
                 const getUnique = (key) => [...new Set(rawData.map(i => i[key]).filter(v => v && String(v).trim() !== ""))].sort();
                 const fillSelect = (id, items) => { const el = document.getElementById(id); if(el) items.forEach(v => el.add(new Option(v, v))); };
-                fillSelect('f-responsavel', getUnique('responsavel')); fillSelect('f-modalidade', getUnique('modalidade')); fillSelect('f-fase', getUnique('fase_atual'));
+                fillSelect('f-modalidade', getUnique('modalidade'));
+
                 updateView(rawData);
                 const loader = document.getElementById('loadingOverlay'); if(loader) { loader.style.display = 'none'; }
             } catch (err) { console.error("Erro fatal:", err); alert("Erro de conexão com Supabase."); }
