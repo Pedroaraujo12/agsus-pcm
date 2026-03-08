@@ -266,10 +266,15 @@
             // 2. Responsáveis (Bar Horiz)
             if(charts.resp) charts.resp.destroy();
             const resData = countBy('responsavel');
+            const sortedLabels = Object.keys(resData).sort((a, b) => {
+                if (a === 'N/I') return 1;
+                if (b === 'N/I') return -1;
+                return resData[b] - resData[a]; // Ordena por quantidade descendente
+            });
             charts.resp = new Chart(document.getElementById('chartResp'), {
-                type: 'bar', data: { labels: Object.keys(resData), datasets: [{ data: Object.values(resData), backgroundColor: '#3b82f6', borderRadius: 4 }] },
+                type: 'bar', data: { labels: sortedLabels, datasets: [{ data: sortedLabels.map(l => resData[l]), backgroundColor: '#3b82f6', borderRadius: 4 }] },
                 options: { indexAxis: 'y', maintainAspectRatio: false, 
-                    onClick: (e, activeEls) => { if (activeEls.length > 0) { filterByField('responsavel', Object.keys(resData)[activeEls[0].index]); } },
+                    onClick: (e, activeEls) => { if (activeEls.length > 0) { filterByField('responsavel', sortedLabels[activeEls[0].index]); } },
                     plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } }
             });
 
