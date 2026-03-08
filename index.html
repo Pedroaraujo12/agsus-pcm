@@ -40,7 +40,6 @@
 </head>
 <body class="flex">
 
-    <!-- OVERLAY DE CARREGAMENTO -->
     <div id="loadingOverlay">
         <div class="flex flex-col items-center gap-4">
             <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -48,15 +47,12 @@
         </div>
     </div>
 
-    <!-- SIDEBAR -->
     <aside class="sidebar glass-card">
         <div class="hidden lg:flex mb-10 text-blue-500 scale-110">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50">
-            <div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div>
-        </div>
+        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
     </aside>
 
     <main class="main-container">
@@ -71,7 +67,6 @@
             </div>
         </header>
 
-        <!-- INDICADORES -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div class="glass-card p-6 rounded-[1.5rem] clickable-stat" onclick="filterByStat('Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos Totais</p><h3 id="stat_procs" class="text-3xl font-black">--</h3></div>
             <div class="glass-card p-6 rounded-[1.5rem]"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Estimado</p><h3 id="stat_val" class="text-lg font-black truncate text-slate-100">R$ 0,00</h3></div>
@@ -79,7 +74,6 @@
             <div class="glass-card p-6 rounded-[1.5rem] border-l-4 border-l-red-500 text-red-100 clickable-stat" onclick="filterByStat('Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Em Atraso</p><h3 id="stat_delay" class="text-3xl font-black">--</h3></div>
         </div>
 
-        <!-- FILTROS -->
         <div class="glass-card p-4 rounded-2xl mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
             <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar..." class="filter-select bg-slate-800/40">
             <select id="f-prazo" onchange="runFilters()" class="filter-select"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
@@ -120,7 +114,6 @@
         </div>
     </main>
 
-    <!-- MODAL DETALHES -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
             <div id="modalContent" class="p-8 space-y-4"></div>
@@ -139,18 +132,15 @@
                 <input type="hidden" id="edit_proc_id_pk">
                 <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ID Processo (SEI)</label><input type="text" id="edit_proc_id" readonly class="form-input opacity-50"></div>
                 <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Objeto Resumido</label><textarea id="edit_proc_objeto" rows="2" class="form-input"></textarea></div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Responsável</label><select id="edit_proc_resp" class="form-input"></select></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status</label><select id="edit_proc_status" class="form-input"><option>Não recebido</option><option>Em análise</option><option>Em elaboração</option><option>Publicado</option><option>Homologado</option><option>Cancelado</option></select></div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fase Atual</label><input type="text" id="edit_proc_fase" class="form-input"></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_proc_val" class="form-input"></div>
                 </div>
                 <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_proc_hom" class="form-input"></div>
-
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="document.getElementById('modalEditProcess').classList.add('hidden')" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest transition border border-white/5">Cancelar</button>
                     <button type="submit" class="flex-1 bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
@@ -165,7 +155,7 @@
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let rawData = [], charts = {};
-        const responsaveisPadrao = ["Pedro Silva", "Gorete Pereira", "Roberto (IA)", "NAAGE", "Diretoria"];
+        const responsaveisPlanilha = ["Karla Oliveira", "Pedro", "Thiago", "Viviane", "Vivian", "Gorete Pereira"];
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
@@ -242,28 +232,8 @@
             table.innerHTML = data.map(i => {
                 const agA = getAging(i.data_prevista);
                 const match = i.observacoes ? i.observacoes.match(/<!--METADATA_DATES:ATIV=(.*)\|FINAL=(.*)-->/) : null;
-                const linkIcon = i.processo_link ? `<svg class="w-3 h-3 inline-block ml-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>` : '';
-                return `
-                <tr class="hover:bg-white/5 transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
-                    <td class="py-4 font-black text-blue-400 truncate">${i.id_processo}${linkIcon}</td>
-                    <td class="py-4">
-                        <div class="font-bold text-slate-100 truncate">${i.fase_atual || '-'}</div>
-                        <div class="text-[8px] text-slate-500 uppercase truncate">${i.objeto_resumido || ''}</div>
-                    </td>
-                    <td class="py-4 text-center"><span class="aging-badge ${agA.class}">${agA.label}</span><div class="text-[8px] text-slate-500 mt-0.5">${formatDate(i.data_prevista)}</div></td>
-                    <td class="py-4 text-center text-slate-300 font-bold">${formatDate(match ? match[2] : null)}</td>
-                    <td class="py-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td>
-                    <td class="py-4 text-center">
-                        <div class="flex justify-center gap-2">
-                            <button onclick="event.stopPropagation(); openEditProcess('${i.id_processo}')" class="p-1.5 hover:text-blue-400 transition" title="Editar">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
-                            <button onclick="event.stopPropagation(); deleteProcess('${i.id_processo}')" class="p-1.5 hover:text-red-500 transition" title="Excluir">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
+                const linkIcon = i.processo_link ? `<svg class="w-3 h-3 inline-block ml-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>` : '';
+                return `<tr class="hover:bg-white/5 transition cursor-pointer" onclick="openDetails('${i.id_processo}')"><td class="py-4 font-black text-blue-400 truncate">${i.id_processo}${linkIcon}</td><td class="py-4"><div class="font-bold text-slate-100 truncate">${i.fase_atual || '-'}</div><div class="text-[8px] text-slate-500 uppercase truncate">${i.objeto_resumido || ''}</div></td><td class="py-4 text-center"><span class="aging-badge ${agA.class}">${agA.label}</span><div class="text-[8px] text-slate-500 mt-0.5">${formatDate(i.data_prevista)}</div></td><td class="py-4 text-center text-slate-300 font-bold">${formatDate(match ? match[2] : null)}</td><td class="py-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td><td class="py-4 text-center"><div class="flex justify-center gap-2"><button onclick="event.stopPropagation(); openEditProcess('${i.id_processo}')" class="p-1.5 hover:text-blue-400 transition" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProcess('${i.id_processo}')" class="p-1.5 hover:text-red-500 transition" title="Excluir"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td></tr>`;
             }).join('') || '<tr><td colspan="6" class="py-10 text-center opacity-30 uppercase font-black tracking-widest text-[10px]">Sem dados</td></tr>';
             renderCharts(data);
         }
@@ -294,15 +264,12 @@
         }
         function closeDetails() { document.getElementById('modalDetails').classList.add('hidden'); }
 
-        // GESTÃO DE PROCESSO (EDITAR/EXCLUIR)
         function openEditProcess(id) {
             const item = rawData.find(x => String(x.id_processo) === String(id));
             if (!item) return;
-
             const selResp = document.getElementById('edit_proc_resp');
             selResp.innerHTML = '';
-            responsaveisPadrao.forEach(r => selResp.add(new Option(r, r)));
-
+            responsaveisPlanilha.forEach(r => selResp.add(new Option(r, r)));
             document.getElementById('edit_proc_id_pk').value = item.id_processo;
             document.getElementById('edit_proc_id').value = item.id_processo;
             document.getElementById('edit_proc_objeto').value = item.objeto_resumido || '';
@@ -310,34 +277,20 @@
             document.getElementById('edit_proc_fase').value = item.fase_atual || '';
             document.getElementById('edit_proc_val').value = cleanNum(item.vlr_estimado_anual);
             document.getElementById('edit_proc_hom').value = cleanNum(item.vlr_homologado);
-            document.getElementById('edit_proc_resp').value = item.responsavel || "Pedro Silva";
-
+            document.getElementById('edit_proc_resp').value = item.responsavel || "Pedro";
             document.getElementById('modalEditProcess').classList.remove('hidden');
         }
 
         document.getElementById('processEditForm').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit_proc_id_pk').value;
-            const payload = {
-                objeto_resumido: document.getElementById('edit_proc_objeto').value,
-                status: document.getElementById('edit_proc_status').value,
-                fase_atual: document.getElementById('edit_proc_fase').value,
-                vlr_estimado_anual: document.getElementById('edit_proc_val').value,
-                vlr_homologado: document.getElementById('edit_proc_hom').value,
-                responsavel: document.getElementById('edit_proc_resp').value
-            };
+            const payload = { objeto_resumido: document.getElementById('edit_proc_objeto').value, status: document.getElementById('edit_proc_status').value, fase_atual: document.getElementById('edit_proc_fase').value, vlr_estimado_anual: document.getElementById('edit_proc_val').value, vlr_homologado: document.getElementById('edit_proc_hom').value, responsavel: document.getElementById('edit_proc_resp').value };
             const { error } = await sb.from('licitacoes').update(payload).eq('id_processo', id);
             if(!error) location.reload();
             else alert("Erro ao salvar: " + error.message);
         };
 
-        async function deleteProcess(id) {
-            if(confirm(`ATENÇÃO: Deseja excluir o processo ${id} permanentemente?`)) {
-                const { error } = await sb.from('licitacoes').delete().eq('id_processo', id);
-                if(!error) location.reload();
-                else alert("Erro ao excluir: " + error.message);
-            }
-        }
+        async function deleteProcess(id) { if(confirm(`ATENÇÃO: Deseja excluir o processo ${id} permanentemente?`)) { const { error } = await sb.from('licitacoes').delete().eq('id_processo', id); if(!error) location.reload(); else alert("Erro ao excluir: " + error.message); } }
 
         async function init() {
             try {
