@@ -3,147 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgSUS PCM | Gestão de Compras</title>
+    <title>AgSUS PCM | Gestão Estratégica</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); margin: 0; min-height: 100vh; display: flex; flex-direction: column; color: #f8fafc; }
-        @media (min-width: 1024px) { body { flex-direction: row; overflow: hidden; } }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; overflow-x: auto; }
-        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; overflow-x: hidden; } }
-        .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 12px; color: #64748b; transition: all 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        .nav-item .tooltip-text { visibility: hidden; position: absolute; background-color: #1e293b; color: #fff; text-align: center; padding: 8px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        @media (min-width: 1024px) { .nav-item .tooltip-text { left: 120%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip-text { visibility: visible; opacity: 1; } }
-        .main-container { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
-        @media (min-width: 1024px) { .main-container { padding: 32px; height: 100vh; } }
-        .filter-select { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px 12px; color: #e2e8f0; font-size: 11px; outline: none; transition: all 0.2s; width: 100%; cursor: pointer; }
-        .aging-badge { font-size: 8px; padding: 4px 10px; border-radius: 4px; font-weight: 900; text-transform: uppercase; white-space: nowrap; }
-        .aging-red { background-color: #ef4444 !important; color: white !important; }
-        .aging-yellow { background-color: #f59e0b !important; color: black !important; }
-        .aging-green { background-color: #22c55e !important; color: white !important; }
-        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
-        table { width: 100%; min-width: 900px; table-layout: fixed; border-collapse: separate; border-spacing: 0 8px; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .clickable-stat { cursor: pointer; transition: transform 0.2s; }
-        .clickable-stat:hover { transform: translateY(-3px); }
-        #loadingOverlay { position: fixed; inset: 0; background: #020617; z-index: 1000; display: flex; flex-direction: column; items-center; justify-content: center; }
-        .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; font-size: 12px; }
-        option { background: #0f172a; color: white; }
+        :root { --glass: rgba(15, 23, 42, 0.8); --accent: #3b82f6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
+        
+        .glass-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; }
+        
+        /* SIDEBAR PREMIUM */
+        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; background: #0f172a; }
+        @media (min-width: 1024px) { .sidebar { width: 72px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; } }
+        
+        .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 12px; color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); transform: scale(1.05); }
+        
+        /* TOOLTIPS (LEGENDAS) PROFISSIONAIS */
+        .nav-item .tooltip {
+            visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: all 0.2s ease; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); letter-spacing: 0.05em;
+        }
+        @media (min-width: 1024px) { .nav-item .tooltip { left: 140%; top: 50%; transform: translateY(-50%) translateX(-10px); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; transform: translateY(-50%) translateX(0px); } }
+        @media (max-width: 1023px) { .nav-item .tooltip { bottom: 130%; left: 50%; transform: translateX(-50%) translateY(10px); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0px); } }
+
+        .main-content { flex: 1; padding: 24px; overflow-y: auto; height: 100vh; }
+        .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* SHADCN-LIKE ELEMENTS */
+        .btn-primary { background: var(--accent); color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; transition: all 0.2s; display: inline-flex; items-center; gap: 8px; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; color: white; font-size: 13px; outline: none; transition: border 0.2s; }
+        .input-base:focus { border-color: var(--accent); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
 </head>
-<body class="flex">
+<body>
 
-    <div id="loadingOverlay">
-        <div class="flex flex-col items-center gap-4">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Iniciando AgSUS PCM...</p>
-        </div>
-    </div>
-
-    <aside class="sidebar glass-card">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-110">
+    <aside class="sidebar">
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-125">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
         </div>
-        <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
+        <nav id="globalNav" class="flex flex-row lg:flex-col"></nav>
     </aside>
 
-    <main class="main-container">
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div class="w-full">
-                <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">AgSUS PCM SaaS</p>
-                <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight leading-none">Fluxo de <br class="md:hidden"> Execução</h1>
+    <main class="main-content">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Dashboard PCM</h1>
+                <p class="text-slate-400 text-xs font-medium uppercase tracking-[0.2em] mt-1">Coordenação de Compras • AgSUS</p>
             </div>
-            <div class="flex gap-3 w-full md:w-auto">
-                <button onclick="location.reload()" class="bg-slate-800 text-white px-6 py-4 rounded-2xl text-xs font-black uppercase border border-white/10">Sincronizar</button>
-                <button onclick="location.href='novo-processo.html'" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">+ Novo Processo</button>
+            <div class="flex gap-3">
+                <button onclick="location.href='novo-processo.html'" class="btn-primary">+ Novo Processo</button>
             </div>
         </header>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-6 rounded-[1.5rem] clickable-stat" onclick="filterByStat('Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos Totais</p><h3 id="stat_procs" class="text-3xl font-black">--</h3></div>
-            <div class="glass-card p-6 rounded-[1.5rem]"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Estimado</p><h3 id="stat_val" class="text-lg font-black truncate text-slate-100">R$ 0,00</h3></div>
-            <div class="glass-card p-6 rounded-[1.5rem] border-l-4 border-l-emerald-500 text-emerald-400"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Economia (Savings)</p><h3 id="stat_save" class="text-lg font-black truncate">R$ 0,00</h3></div>
-            <div class="glass-card p-6 rounded-[1.5rem] border-l-4 border-l-red-500 text-red-100 clickable-stat" onclick="filterByStat('Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Em Atraso</p><h3 id="stat_delay" class="text-3xl font-black">--</h3></div>
-        </div>
-
-        <div class="glass-card p-4 rounded-2xl mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-            <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar..." class="filter-select bg-slate-800/40">
-            <select id="f-prazo" onchange="runFilters()" class="filter-select"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
-            <select id="f-responsavel" onchange="runFilters()" class="filter-select"><option value="Todos">Responsável</option></select>
-            <select id="f-modalidade" onchange="runFilters()" class="filter-select"><option value="Todos">Modalidade</option></select>
-            <select id="f-fase" onchange="runFilters()" class="filter-select"><option value="Todos">Etapa (SLA)</option></select>
-            <button onclick="clearAllFilters()" class="bg-slate-700 text-white rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase">Limpar</button>
+        <!-- KPI GRID -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="glass-card p-6 border-l-4 border-blue-500">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Processos Ativos</p>
+                <h3 id="stat_procs" class="text-3xl font-black italic tracking-tighter">--</h3>
+            </div>
+            <div class="glass-card p-6 border-l-4 border-indigo-500">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Estimado</p>
+                <h3 id="stat_val" class="text-xl font-black">R$ 0,00</h3>
+            </div>
+            <div class="glass-card p-6 border-l-4 border-emerald-500">
+                <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Savings Realizado</p>
+                <h3 id="stat_save" class="text-xl font-black text-emerald-400">R$ 0,00</h3>
+            </div>
+            <div class="glass-card p-6 border-l-4 border-red-500">
+                <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Alertas / Atrasos</p>
+                <h3 id="stat_delay" class="text-3xl font-black text-red-400">--</h3>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 glass-card rounded-[2rem] overflow-hidden">
-                <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                    <h2 class="text-xs font-bold uppercase text-slate-400">Processos Ativos</h2>
-                    <span id="rowCount" class="text-[9px] font-bold bg-slate-800 px-3 py-1 rounded-full text-slate-500">-- processos</span>
+            <!-- TABELA DINÂMICA -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="glass-card p-4 flex flex-wrap gap-3">
+                    <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Filtrar por ID ou Objeto..." class="input-base flex-1 min-w-[200px]">
+                    <select id="f-fase" onchange="runFilters()" class="input-base min-w-[150px]"><option value="Todos">Todas as Etapas</option></select>
+                    <select id="f-responsavel" onchange="runFilters()" class="input-base min-w-[150px]"><option value="Todos">Responsáveis</option></select>
                 </div>
-                <div class="table-container p-6">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-[9px] font-black uppercase text-slate-500 tracking-tighter border-b border-white/10">
-                                <th class="w-[18%] pb-4 text-left">ID Processo</th>
-                                <th class="w-[28%] pb-4 text-left">Fase / Status</th>
-                                <th class="w-[18%] pb-4 text-center">Prazo Tarefa</th>
-                                <th class="w-[18%] pb-4 text-center">Entrega Final</th>
-                                <th class="w-[18%] pb-4 text-right">Vlr Est.</th>
-                                <th class="w-[10%] pb-4 text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mainTable" class="text-[10px] divide-y divide-white/5"></tbody>
-                    </table>
+                
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto p-2">
+                        <table class="w-full text-left border-separate border-spacing-y-2">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4">
+                                    <th class="pb-4 pl-4">ID Processo</th>
+                                    <th class="pb-4">Etapa / Status</th>
+                                    <th class="pb-4 text-center">Prazo</th>
+                                    <th class="pb-4 text-right pr-4">Valor Est.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mainTable" class="text-[11px]"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
+            <!-- ANALYTICS -->
             <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl h-[220px]"><h2 class="text-[10px] font-bold uppercase text-indigo-400 mb-4">Responsáveis</h2><canvas id="chartResponsavel"></canvas></div>
-                <div class="glass-card p-6 rounded-2xl h-[220px]"><h2 class="text-[10px] font-bold uppercase text-blue-400 mb-4">Modalidades</h2><canvas id="chartModalidade"></canvas></div>
-                <div class="glass-card p-6 rounded-2xl h-[220px]"><h2 class="text-[10px] font-bold uppercase text-emerald-400 mb-4">Saúde dos Prazos</h2><canvas id="chartStatus"></canvas></div>
+                <div class="glass-card p-6">
+                    <h3 class="text-xs font-bold uppercase text-slate-400 mb-6">Carga por Responsável</h3>
+                    <div class="h-[200px]"><canvas id="chartResponsavel"></canvas></div>
+                </div>
+                <div class="glass-card p-6">
+                    <h3 class="text-xs font-bold uppercase text-slate-400 mb-6">Saúde dos Prazos (SLA)</h3>
+                    <div class="h-[200px]"><canvas id="chartStatus"></canvas></div>
+                </div>
             </div>
         </div>
     </main>
 
-    <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
-            <div id="modalContent" class="p-8 space-y-4"></div>
-            <div class="px-8 py-4 border-t border-white/5 text-right shrink-0 flex gap-2 justify-end">
-                <button id="btnProcessoLink" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl text-[10px] font-bold border border-white/10">Abrir SEI</button>
-                <button onclick="closeDetails()" class="bg-slate-800 text-white px-8 py-2 rounded-xl text-[10px] font-bold border border-white/10">Fechar</button>
+    <!-- MODAL DETALHES -->
+    <div id="modalDetails" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-xl shadow-2xl border border-white/10 overflow-hidden">
+            <div class="p-8 space-y-6" id="detailsContent"></div>
+            <div class="p-6 border-t border-white/5 flex justify-end gap-3">
+                <button onclick="closeDetails()" class="input-base hover:bg-slate-800 transition uppercase font-bold text-[10px] px-8">Fechar</button>
             </div>
-        </div>
-    </div>
-
-    <div id="modalEditProcess" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Processo</h2><button onclick="document.getElementById('modalEditProcess').classList.add('hidden')" class="text-2xl opacity-50 hover:opacity-100">&times;</button></div>
-            <form id="processEditForm" class="p-8 space-y-4">
-                <input type="hidden" id="edit_proc_id_pk">
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ID Processo (SEI)</label><input type="text" id="edit_proc_id" readonly class="form-input opacity-50"></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Objeto Resumido</label><textarea id="edit_proc_objeto" rows="2" class="form-input"></textarea></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Responsável</label><select id="edit_proc_resp" class="form-input"></select></div>
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status</label><select id="edit_proc_status" class="form-input"><option>Não recebido</option><option>Em análise</option><option>Em elaboração</option><option>Publicado</option><option>Homologado</option><option>Cancelado</option></select></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fase Atual (SLA)</label><select id="edit_proc_fase" class="form-input"></select></div>
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_proc_val" class="form-input"></div>
-                </div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_proc_hom" class="form-input"></div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="document.getElementById('modalEditProcess').classList.add('hidden')" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest transition border border-white/5">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -152,12 +137,12 @@
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        let rawData = [], charts = {}, globalEtapas = [], globalEquipe = [];
+        let rawData = [], charts = {}, globalEtapas = [];
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
-            { title: 'Novo Processo', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
-            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
+            { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'Editais & PNCP', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
             { title: 'Fornecedores', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
             { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
             { title: 'Avaliação', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
@@ -169,147 +154,132 @@
 
         function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
         function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
-        function formatDate(d) { if(!d || d === 'None') return '-'; const iso = String(d).split('T')[0]; const p = iso.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d; }
 
         function getAging(dateStr) {
-            if (!dateStr || dateStr === 'None') return { label: 'N/A', class: 'opacity-20' };
+            if (!dateStr || dateStr === 'None') return { label: 'N/A', class: 'text-slate-600' };
             let iso = dateStr; if (dateStr.includes('/')) { const p = dateStr.split('/'); iso = `${p[2]}-${p[1]}-${p[0]}`; }
-            const target = new Date(iso.split('T')[0]); if (isNaN(target)) return { label: 'Data Inv.', class: '' };
-            const today = new Date(); today.setHours(0,0,0,0);
+            const target = new Date(iso.split('T')[0]); today = new Date(); today.setHours(0,0,0,0);
             const diff = Math.ceil((target - today) / 86400000);
-            if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'aging-red' };
-            if (diff <= 2) return { label: `Vence em ${diff}d`, class: 'aging-yellow' };
-            return { label: `No Prazo (${diff}d)`, class: 'aging-green' };
+            if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'text-red-500 font-black' };
+            if (diff <= 2) return { label: `Vence em ${diff}d`, class: 'text-amber-500 font-bold' };
+            return { label: `No Prazo (${diff}d)`, class: 'text-emerald-500' };
         }
 
-        function filterByStat(type) {
-            const el = document.getElementById('f-prazo');
-            if(el) { el.value = type; runFilters(); }
-        }
+        async function init() {
+            // Sidebar Dinâmica com Tooltips Reais
+            const nav = document.getElementById('globalNav');
+            nav.innerHTML = menuItems.map(m => `
+                <div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
+                    <span class="tooltip">${m.title}</span>
+                </div>`).join('');
 
-        function clearAllFilters() {
-            document.getElementById('searchBox').value = '';
-            document.getElementById('f-prazo').value = 'Todos';
-            document.getElementById('f-responsavel').value = 'Todos';
-            document.getElementById('f-modalidade').value = 'Todos';
-            document.getElementById('f-fase').value = 'Todos';
-            runFilters();
+            // Carregar dados auxiliares
+            const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
+            const { data: equipe } = await sb.from('equipe').select('*').order('nome');
+            globalEtapas = etapas || [];
+
+            const fFase = document.getElementById('f-fase');
+            globalEtapas.forEach(e => fFase.add(new Option(e.descricao, e.descricao)));
+            const fResp = document.getElementById('f-responsavel');
+            equipe.forEach(r => fResp.add(new Option(r.nome, r.nome)));
+
+            // Carregar Licitacoes
+            const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
+            rawData = data || [];
+            updateView(rawData);
         }
 
         function runFilters() {
             const s = document.getElementById('searchBox').value.toLowerCase();
-            const p = document.getElementById('f-prazo').value;
-            const r = document.getElementById('f-responsavel').value;
-            const m = document.getElementById('f-modalidade').value;
             const f = document.getElementById('f-fase').value;
+            const r = document.getElementById('f-responsavel').value;
 
             const filtered = rawData.filter(i => {
-                const textMatch = !s || (String(i.objeto_resumido||"") + String(i.id_processo||"")).toLowerCase().includes(s);
-                if (!textMatch) return false;
-                if (p !== 'Todos') { const ag = getAging(i.data_prevista); if (p === 'Atrasados' && ag.class !== 'aging-red') return false; if (p === 'No Prazo' && ag.class === 'aging-red') return false; }
-                if (r !== 'Todos' && i.responsavel !== r) return false;
-                if (m !== 'Todos' && i.modalidade !== m) return false;
+                if (s && !(String(i.objeto_resumido||"") + String(i.id_processo||"")).toLowerCase().includes(s)) return false;
                 if (f !== 'Todos' && i.fase_atual !== f) return false;
+                if (r !== 'Todos' && i.responsavel !== r) return false;
                 return true;
             });
             updateView(filtered);
         }
 
         function updateView(data) {
-            const table = document.getElementById('mainTable');
-            if(!table) return;
             document.getElementById('stat_procs').innerText = data.length;
-            document.getElementById('rowCount').innerText = data.length + " processos";
             const sumEst = data.reduce((acc, i) => acc + cleanNum(i.vlr_estimado_anual), 0);
-            const economiaReal = data.reduce((acc, i) => { const est = cleanNum(i.vlr_estimado_anual); const hom = cleanNum(i.vlr_homologado); return hom > 0 ? acc + (est - hom) : acc; }, 0);
+            const sumHom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
             document.getElementById('stat_val').innerText = formatBRL(sumEst);
-            document.getElementById('stat_save').innerText = formatBRL(economiaReal);
-            document.getElementById('stat_delay').innerText = data.filter(i => getAging(i.data_prevista).class === 'aging-red').length;
+            document.getElementById('stat_save').innerText = formatBRL(sumEst - sumHom);
+            
+            const table = document.getElementById('mainTable');
             table.innerHTML = data.map(i => {
-                const agA = getAging(i.data_prevista);
-                const match = i.observacoes ? i.observacoes.match(/<!--METADATA_DATES:ATIV=(.*)\|FINAL=(.*)-->/) : null;
-                const linkIcon = i.processo_link ? `<svg class="w-3 h-3 inline-block ml-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>` : '';
-                return `<tr class="hover:bg-white/5 transition cursor-pointer" onclick="openDetails('${i.id_processo}')"><td class="py-4 font-black text-blue-400 truncate">${i.id_processo}${linkIcon}</td><td class="py-4"><div class="font-bold text-slate-100 truncate">${i.fase_atual || '-'}</div><div class="text-[8px] text-slate-500 uppercase truncate">${i.objeto_resumido || ''}</div></td><td class="py-4 text-center"><span class="aging-badge ${agA.class}">${agA.label}</span><div class="text-[8px] text-slate-500 mt-0.5">${formatDate(i.data_prevista)}</div></td><td class="py-4 text-center text-slate-300 font-bold">${formatDate(match ? match[2] : null)}</td><td class="py-4 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td><td class="py-4 text-center"><div class="flex justify-center gap-2"><button onclick="event.stopPropagation(); openEditProcess('${i.id_processo}')" class="p-1.5 hover:text-blue-400 transition" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProcess('${i.id_processo}')" class="p-1.5 hover:text-red-500 transition" title="Excluir"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td></tr>`;
-            }).join('') || '<tr><td colspan="6" class="py-10 text-center opacity-30 uppercase font-black tracking-widest text-[10px]">Sem dados</td></tr>';
+                const aging = getAging(i.data_prevista);
+                return `
+                <tr class="hover:bg-white/5 transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
+                    <td class="p-4 rounded-l-xl bg-white/[0.02] border-y border-l border-white/5 font-black text-blue-400">${i.id_processo}</td>
+                    <td class="p-4 bg-white/[0.02] border-y border-white/5">
+                        <div class="font-bold text-slate-100">${i.fase_atual || '-'}</div>
+                        <div class="text-[8px] text-slate-500 uppercase tracking-widest truncate max-w-[200px]">${i.objeto_resumido}</div>
+                    </td>
+                    <td class="p-4 bg-white/[0.02] border-y border-white/5 text-center ${aging.class}">${aging.label}</td>
+                    <td class="p-4 rounded-r-xl bg-white/[0.02] border-y border-r border-white/5 text-right font-black text-slate-100">${formatBRL(i.vlr_estimado_anual)}</td>
+                </tr>`;
+            }).join('');
+
             renderCharts(data);
         }
 
         function renderCharts(data) {
-            const countBy = (k) => data.reduce((a, i) => { let v = String(i[k]||'N/I').trim(); if(v==="")v="N/I"; a[v]=(a[v]||0)+1; return a; }, {});
-            drawChart('chartModalidade', 'doughnut', Object.keys(countBy('modalidade')), Object.values(countBy('modalidade')), ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7']);
-            const s = data.reduce((a, i) => { const c = getAging(i.data_prevista).class; if(c==='aging-green')a.g++; else if(c==='aging-yellow')a.y++; else if(c==='aging-red')a.r++; return a; }, {g:0,y:0,r:0});
-            drawChart('chartStatus', 'bar', ['No Prazo', 'Alerta', 'Atrasado'], [s.g, s.y, s.r], ['#10b981', '#f59e0b', '#ef4444'], true);
-            const rData = countBy('responsavel'); drawChart('chartResponsavel', 'bar', Object.keys(rData), Object.values(rData), ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7'], true);
-        }
+            const countBy = (k) => data.reduce((a, i) => { let v = i[k]||'N/I'; a[v]=(a[v]||0)+1; return a; }, {});
+            
+            // Gráfico Responsável
+            if(charts.resp) charts.resp.destroy();
+            const ctxR = document.getElementById('chartResponsavel').getContext('2d');
+            const resData = countBy('responsavel');
+            charts.resp = new Chart(ctxR, {
+                type: 'bar',
+                data: { labels: Object.keys(resData), datasets: [{ data: Object.values(resData), backgroundColor: '#3b82f6', borderRadius: 6 }] },
+                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 10 } } } } }
+            });
 
-        function drawChart(id, type, labels, values, color, horiz = false) {
-            const canvas = document.getElementById(id); if(!canvas) return;
-            if (charts[id]) charts[id].destroy();
-            const ctx = canvas.getContext('2d');
-            charts[id] = new Chart(ctx, { 
-                type, data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 5 }] }, 
-                options: { indexAxis: horiz ? 'y' : 'x', maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) { const l = labels[activeEls[0].index]; if (id === 'chartResponsavel') document.getElementById('f-responsavel').value = l; if (id === 'chartModalidade') document.getElementById('f-modalidade').value = l; runFilters(); } }, plugins: { legend: { display: type === 'doughnut', position: 'right', labels: { color: '#94a3b8', font: { size: 8 } } } }, scales: { x: { display: type !== 'doughnut', grid: { display: false }, ticks: { color: '#475569', font: { size: 8 } } }, y: { display: type !== 'doughnut', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#475569', font: { size: 8 } } } } } 
+            // Gráfico Status
+            if(charts.stat) charts.stat.destroy();
+            const ctxS = document.getElementById('chartStatus').getContext('2d');
+            const statData = countBy('status');
+            charts.stat = new Chart(ctxS, {
+                type: 'doughnut',
+                data: { labels: Object.keys(statData), datasets: [{ data: Object.values(statData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 }, usePointStyle: true } } } }
             });
         }
 
         function openDetails(id) {
-            const item = rawData.find(x => String(x.id_processo) === String(id)); if (!item) return;
-            document.getElementById('modalContent').innerHTML = `<div class="glass-card p-6 rounded-2xl bg-white/5 mb-4"><p class="text-[8px] font-black text-blue-400 uppercase mb-2">Objeto</p><h3 class="text-sm font-bold text-white leading-relaxed">${item.objeto_resumido}</h3><p class="text-[8px] font-bold text-slate-500 uppercase mt-2">Responsável: ${item.responsavel || 'N/I'}</p></div><div class="grid grid-cols-2 gap-4"><div class="glass-card p-4 rounded-xl bg-white/5"><p class="text-[8px] font-bold text-slate-500 uppercase mb-1">ID</p><p class="text-[10px] font-black text-white">${item.id_processo}</p></div><div class="glass-card p-4 rounded-xl bg-white/5"><p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Status</p><p class="text-[10px] font-black text-amber-500">${item.status}</p></div></div><div class="grid grid-cols-2 gap-4 mt-4"><div class="glass-card p-4 rounded-xl bg-white/5"><p class="text-[8px] font-bold text-slate-500 uppercase mb-1">Estimado</p><p class="text-sm font-black text-white">${formatBRL(item.vlr_estimado_anual)}</p></div><div class="glass-card p-4 rounded-xl bg-white/5 border-l-4 border-l-emerald-500"><p class="text-[8px] font-bold text-emerald-500 uppercase mb-1">Homologado</p><p class="text-sm font-black text-emerald-400">${formatBRL(item.vlr_homologado)}</p></div></div>`;
-            const btnLink = document.getElementById('btnProcessoLink'); if(item.processo_link) { btnLink.classList.remove('hidden'); btnLink.onclick = () => window.open(item.processo_link, '_blank'); } else { btnLink.classList.add('hidden'); }
+            const item = rawData.find(x => x.id_processo === id);
+            document.getElementById('detailsContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-start">
+                        <h2 class="text-2xl font-black text-white uppercase tracking-tight">${item.id_processo}</h2>
+                        <span class="status-badge bg-blue-500/10 text-blue-400 border-blue-500/20">${item.status}</span>
+                    </div>
+                    <div class="glass-card p-6 bg-white/5 border-white/10">
+                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-2">Objeto da Contratação</p>
+                        <p class="text-sm text-slate-100 font-medium leading-relaxed">${item.objeto_resumido}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p>
+                            <p class="text-sm font-black">${item.responsavel || 'N/I'}</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+                            <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase Atual (SLA)</p>
+                            <p class="text-sm font-black text-indigo-400">${item.fase_atual || 'Não Definida'}</p>
+                        </div>
+                    </div>
+                </div>`;
             document.getElementById('modalDetails').classList.remove('hidden');
         }
         function closeDetails() { document.getElementById('modalDetails').classList.add('hidden'); }
-
-        function openEditProcess(id) {
-            const item = rawData.find(x => String(x.id_processo) === String(id));
-            if (!item) return;
-            const selResp = document.getElementById('edit_proc_resp');
-            selResp.innerHTML = '<option value="">Selecione...</option>';
-            globalEquipe.forEach(r => selResp.add(new Option(r.nome, r.nome)));
-            const selFase = document.getElementById('edit_proc_fase');
-            selFase.innerHTML = '<option value="">Selecione...</option>';
-            globalEtapas.forEach(e => selFase.add(new Option(e.descricao, e.descricao)));
-            document.getElementById('edit_proc_id_pk').value = item.id_processo;
-            document.getElementById('edit_proc_id').value = item.id_processo;
-            document.getElementById('edit_proc_objeto').value = item.objeto_resumido || '';
-            document.getElementById('edit_proc_status').value = item.status || 'Não recebido';
-            document.getElementById('edit_proc_val').value = cleanNum(item.vlr_estimado_anual);
-            document.getElementById('edit_proc_hom').value = cleanNum(item.vlr_homologado);
-            document.getElementById('edit_proc_resp').value = item.responsavel || "";
-            document.getElementById('edit_proc_fase').value = item.fase_atual || "";
-            document.getElementById('modalEditProcess').classList.remove('hidden');
-        }
-
-        document.getElementById('processEditForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit_proc_id_pk').value;
-            const payload = { objeto_resumido: document.getElementById('edit_proc_objeto').value, status: document.getElementById('edit_proc_status').value, fase_atual: document.getElementById('edit_proc_fase').value, vlr_estimado_anual: document.getElementById('edit_proc_val').value, vlr_homologado: document.getElementById('edit_proc_hom').value, responsavel: document.getElementById('edit_proc_resp').value };
-            const { error } = await sb.from('licitacoes').update(payload).eq('id_processo', id);
-            if(!error) location.reload(); else alert("Erro ao salvar: " + error.message);
-        };
-
-        async function deleteProcess(id) { if(confirm(`Deseja excluir o processo ${id}?`)) { const { error } = await sb.from('licitacoes').delete().eq('id_processo', id); if(!error) location.reload(); } }
-
-        async function init() {
-            try {
-                const nav = document.getElementById('globalNav'); 
-                if(nav) nav.innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='index.html'?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip-text">${m.title}</span></div>`).join('');
-                const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
-                const { data: equipe } = await sb.from('equipe').select('*').order('nome');
-                globalEtapas = etapas || [];
-                globalEquipe = equipe || [];
-                const fFase = document.getElementById('f-fase');
-                if(fFase) { fFase.innerHTML = '<option value="Todos">Etapa (SLA)</option>'; globalEtapas.forEach(e => fFase.add(new Option(e.descricao, e.descricao))); }
-                const fResp = document.getElementById('f-responsavel');
-                if(fResp) { fResp.innerHTML = '<option value="Todos">Responsável</option>'; globalEquipe.forEach(r => fResp.add(new Option(r.nome, r.nome))); }
-                const { data, error } = await sb.from('licitacoes').select('*').order('id_processo'); if (error) throw error;
-                rawData = data || [];
-                const fillSelect = (id, items) => { const el = document.getElementById(id); if(el) [...new Set(items)].sort().forEach(v => el.add(new Option(v, v))); };
-                fillSelect('f-modality', rawData.map(i => i.modalidade).filter(Boolean));
-                updateView(rawData);
-                const loader = document.getElementById('loadingOverlay'); if(loader) loader.style.display = 'none';
-            } catch (err) { console.error(err); }
-        }
+        
         window.onload = init;
     </script>
 </body>

@@ -8,99 +8,70 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; transition: all 0.2s; font-size: 12px; }
-        .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
-        label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-        .btn-loading { opacity: 0.7; pointer-events: none; }
-        option { background: #0f172a; color: white; }
+        :root { --glass: rgba(15, 23, 42, 0.9); --accent: #3b82f6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
+        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; color: white; font-size: 13px; outline: none; width: 100%; transition: border 0.2s; }
+        .input-base:focus { border-color: var(--accent); }
+        label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
+        .btn-primary { background: var(--accent); color: white; padding: 14px; border-radius: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; transition: 0.2s; width: 100%; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
     </style>
 </head>
-<body class="p-4 md:p-8 flex justify-center items-center">
+<body class="p-4">
 
-    <div class="glass-card w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-6 flex justify-between items-center">
+    <div class="glass-card w-full max-w-2xl shadow-2xl overflow-hidden">
+        <div class="bg-blue-600 p-8 flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-black uppercase tracking-tight text-white">Protocolar Novo Processo</h2>
-                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest">Integração Dinâmica de Governança</p>
+                <h1 class="text-2xl font-black uppercase tracking-tight text-white">Protocolar Processo</h1>
+                <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mt-1">Módulo de Entrada AgSUS</p>
             </div>
-            <a href="index.html" class="text-white opacity-50 hover:opacity-100 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></a>
+            <button onclick="location.href='index.html'" class="text-white/50 hover:text-white transition text-2xl">&times;</button>
         </div>
 
         <form id="procForm" class="p-8 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label>ID do Processo (SEI)</label>
-                    <input type="text" id="id_processo" required placeholder="AGSUS.00XXXX/2026-XX" class="form-input">
+                    <input type="text" id="id_processo" required placeholder="AGSUS.00XXXX/2026-XX" class="input-base">
                 </div>
                 <div>
                     <label>Objeto Resumido</label>
-                    <input type="text" id="objeto_resumido" required placeholder="Descreva o objeto..." class="form-input">
+                    <input type="text" id="objeto_resumido" required class="input-base">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label>Responsável (Atribuir a...)</label>
-                    <select id="responsavel" class="form-input" required>
-                        <option value="">Carregando equipe...</option>
-                    </select>
+                    <label>Responsável</label>
+                    <select id="responsavel" class="input-base" required><option value="">Carregando...</option></select>
                 </div>
                 <div>
-                    <label>Fase Atual (SLA)</label>
-                    <select id="fase_atual" class="form-input" required>
-                        <option value="">Carregando etapas...</option>
-                    </select>
+                    <label>Etapa Atual (SLA)</label>
+                    <select id="fase_atual" class="input-base" required><option value="">Carregando...</option></select>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label>Demandante</label>
-                    <select id="demandante" class="form-input">
-                        <option value="NAAGE">NAAGE</option>
-                        <option value="DIRETORIA">Diretoria</option>
-                        <option value="SAUDE">Saúde</option>
-                        <option value="INFRA">Infraestrutura</option>
+                    <select id="demandante" class="input-base">
+                        <option>NAAGE</option><option>DIRETORIA</option><option>SAUDE</option><option>INFRA</option>
                     </select>
                 </div>
                 <div>
                     <label>Modalidade</label>
-                    <select id="modalidade" class="form-input">
-                        <option value="Pregão Eletrônico">Pregão Eletrônico</option>
-                        <option value="Cotação de Preços">Cotação de Preços</option>
-                        <option value="Dispensa">Dispensa</option>
-                        <option value="Inexigibilidade">Inexigibilidade</option>
+                    <select id="modalidade" class="input-base">
+                        <option>Pregão Eletrônico</option><option>Cotação de Preços</option><option>Dispensa</option><option>Inexigibilidade</option>
                     </select>
                 </div>
                 <div>
-                    <label>Prioridade</label>
-                    <select id="prioridade" class="form-input">
-                        <option value="Normal">Normal</option>
-                        <option value="Alta">Alta</option>
-                        <option value="Urgente">Urgente</option>
-                    </select>
+                    <label>Valor Estimado</label>
+                    <input type="number" id="vlr_estimado" step="0.01" class="input-base">
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label>Valor Estimado (R$)</label>
-                    <input type="number" id="vlr_estimado" step="0.01" required placeholder="0.00" class="form-input">
-                </div>
-                <div>
-                    <label>Data de Entrada</label>
-                    <input type="date" id="data_entrada" required class="form-input">
-                </div>
-            </div>
-
-            <div id="statusMsg" class="hidden p-4 rounded-xl text-xs font-bold uppercase tracking-widest text-center"></div>
-
-            <div class="pt-4 flex gap-4">
-                <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition uppercase text-xs tracking-widest">Confirmar Protocolo</button>
-            </div>
+            <button type="submit" class="btn-primary mt-4">Confirmar Protocolo</button>
         </form>
     </div>
 
@@ -109,32 +80,21 @@
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function loadConfig() {
-            try {
-                const { data: equipe } = await sb.from('equipe').select('nome').order('nome');
-                const { data: etapas } = await sb.from('fluxo_etapas').select('descricao').order('ordem');
+        async function init() {
+            const { data: equipe } = await sb.from('equipe').select('nome').order('nome');
+            const { data: etapas } = await sb.from('fluxo_etapas').select('descricao').order('ordem');
 
-                const selResp = document.getElementById('responsavel');
-                selResp.innerHTML = '<option value="">Selecione o Responsável</option>';
-                equipe.forEach(r => selResp.add(new Option(r.nome, r.nome)));
+            const selR = document.getElementById('responsavel');
+            selR.innerHTML = '<option value="">Selecione...</option>';
+            equipe.forEach(r => selR.add(new Option(r.nome, r.nome)));
 
-                const selFase = document.getElementById('fase_atual');
-                selFase.innerHTML = '<option value="">Selecione a Etapa Inicial</option>';
-                etapas.forEach(e => selFase.add(new Option(e.descricao, e.descricao)));
-
-            } catch (err) {
-                console.error("Erro ao carregar configurações:", err);
-            }
+            const selF = document.getElementById('fase_atual');
+            selF.innerHTML = '<option value="">Selecione...</option>';
+            etapas.forEach(e => selF.add(new Option(e.descricao, e.descricao)));
         }
 
-        document.getElementById('procForm').addEventListener('submit', async (e) => {
+        document.getElementById('procForm').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            const msg = document.getElementById('statusMsg');
-            
-            btn.innerText = "PROTOCOLANDO...";
-            btn.classList.add('btn-loading');
-
             const payload = {
                 id_processo: document.getElementById('id_processo').value,
                 objeto_resumido: document.getElementById('objeto_resumido').value,
@@ -142,30 +102,13 @@
                 fase_atual: document.getElementById('fase_atual').value,
                 demandante: document.getElementById('demandante').value,
                 modalidade: document.getElementById('modalidade').value,
-                prioridade: document.getElementById('prioridade').value,
                 vlr_estimado_anual: document.getElementById('vlr_estimado').value,
-                data_entrada: document.getElementById('data_entrada').value,
                 status: 'Em análise'
             };
-
             const { error } = await sb.from('licitacoes').insert([payload]);
-
-            if (error) {
-                msg.innerText = "ERRO: " + error.message;
-                msg.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-500');
-                msg.classList.add('bg-red-500/10', 'text-red-500');
-            } else {
-                msg.innerText = "PROCESSO PROTOCOLADO COM SUCESSO!";
-                msg.classList.remove('hidden', 'bg-red-500/10', 'text-red-500');
-                msg.classList.add('bg-emerald-500/10', 'text-emerald-500');
-                setTimeout(() => { window.location.href = "index.html"; }, 1500);
-            }
-
-            btn.innerText = "CONFIRMAR PROTOCOLO";
-            btn.classList.remove('btn-loading');
-        });
-
-        loadConfig();
+            if(!error) location.href = 'index.html';
+        }
+        init();
     </script>
 </body>
 </html>

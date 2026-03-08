@@ -3,114 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgSUS PCM | Gestão de Equipe & Fluxos</title>
+    <title>AgSUS PCM | Governança Estratégica</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+        :root { --glass: rgba(15, 23, 42, 0.8); --accent: #3b82f6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
         @media (min-width: 1024px) { body { flex-direction: row; } }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
-        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; }
-        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; position: sticky; top: 0; } }
         
-        .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 16px; color: #64748b; transition: all 0.3s; cursor: pointer; }
-        .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        .nav-item .tooltip-text { visibility: hidden; position: absolute; background-color: #1e293b; color: #fff; text-align: center; padding: 8px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        @media (min-width: 1024px) { .nav-item .tooltip-text { left: 120%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip-text { visibility: visible; opacity: 1; } }
+        .glass-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; }
+        
+        /* SIDEBAR PROFISSIONAL */
+        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; background: #0f172a; }
+        @media (min-width: 1024px) { .sidebar { width: 72px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; position: sticky; top: 0; } }
+        
+        .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 12px; color: #64748b; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        
+        .nav-item .tooltip {
+            visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: all 0.2s ease; pointer-events: none;
+        }
+        @media (min-width: 1024px) { .nav-item .tooltip { left: 140%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
 
-        .main-container { flex: 1; padding: 32px; overflow-y: auto; }
-        .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; color: white; outline: none; font-size: 12px; width: 100%; }
-        .list-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; transition: 0.2s; }
-        .list-item:hover { background: rgba(255,255,255,0.06); border-color: rgba(59, 130, 246, 0.3); }
-        .badge-prazo { background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .main-content { flex: 1; padding: 32px; overflow-y: auto; }
+        .input-base { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; color: white; font-size: 13px; outline: none; width: 100%; transition: border 0.2s; }
+        .input-base:focus { border-color: var(--accent); }
+        
+        .list-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; transition: 0.2s; }
+        .list-card:hover { border-color: var(--accent); background: rgba(255,255,255,0.06); }
+        .btn-primary { background: var(--accent); color: white; padding: 10px 20px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: 0.2s; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
     </style>
 </head>
-<body class="flex">
+<body>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar glass-card">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-        <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
+    <aside class="sidebar">
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-125">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <nav id="globalNav" class="flex flex-row lg:flex-col"></nav>
     </aside>
 
-    <main class="main-container">
+    <main class="main-content">
         <header class="mb-10">
-            <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo de Governança AgSUS</p>
-            <h1 class="text-3xl font-black uppercase tracking-tight">Gestão de Equipe & Fluxos</h1>
+            <h1 class="text-3xl font-black uppercase tracking-tight">Governança AgSUS</h1>
+            <p class="text-slate-400 text-xs font-medium uppercase tracking-[0.2em] mt-1">Configuração de Normativos e Equipe</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            
-            <!-- GESTÃO DE EQUIPE -->
+            <!-- EQUIPE -->
             <section>
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">Equipe de Compras</h2>
-                    <button onclick="openModal('equipe')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition">+ Novo Responsável</button>
+                <div class="flex justify-between items-end mb-6">
+                    <h2 class="text-sm font-black text-blue-400 uppercase tracking-widest">Equipe de Compras</h2>
+                    <button onclick="openModal('equipe')" class="btn-primary">+ Novo</button>
                 </div>
-                <div id="listEquipe" class="space-y-2">
-                    <div class="py-10 text-center opacity-20 uppercase font-black text-[10px]">Carregando equipe...</div>
-                </div>
+                <div id="listEquipe" class="space-y-2"></div>
             </section>
 
-            <!-- GESTÃO DE FLUXO -->
+            <!-- ETAPAS -->
             <section>
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">Etapas & Prazos (SLA)</h2>
-                    <button onclick="openModal('fluxo')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition">+ Nova Etapa</button>
+                <div class="flex justify-between items-end mb-6">
+                    <h2 class="text-sm font-black text-indigo-400 uppercase tracking-widest">Fluxo & SLA (Dias Úteis)</h2>
+                    <button onclick="openModal('fluxo')" class="btn-primary">+ Nova Etapa</button>
                 </div>
-                <div id="listFluxo" class="space-y-2">
-                    <div class="py-10 text-center opacity-20 uppercase font-black text-[10px]">Carregando etapas...</div>
-                </div>
+                <div id="listFluxo" class="space-y-2"></div>
             </section>
-
-        </div>
-
-        <!-- MODAL ADMIN -->
-        <div id="modalAdmin" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
-            <div class="glass-card w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-                <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white">
-                    <h2 id="modalTitle" class="text-sm font-black uppercase tracking-widest">Configurar Item</h2>
-                    <button onclick="closeModal()" class="text-2xl opacity-50 hover:opacity-100">&times;</button>
-                </div>
-                <form id="adminForm" class="p-8 space-y-6">
-                    <input type="hidden" id="formType">
-                    <input type="hidden" id="editId">
-                    
-                    <div>
-                        <label id="labelNome" class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Nome / Descrição</label>
-                        <input type="text" id="inputNome" required class="form-input">
-                    </div>
-
-                    <div id="fieldsFluxo" class="hidden space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Fase Macro</label>
-                                <select id="inputFase" class="form-input">
-                                    <option>Planejamento</option>
-                                    <option>Produção</option>
-                                    <option>Revisão</option>
-                                    <option>Análise</option>
-                                    <option>Execução</option>
-                                    <option>Aprovação</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Prazo (Dias Úteis)</label>
-                                <input type="number" id="inputPrazo" class="form-input" placeholder="0">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition shadow-lg">Gravar Alterações</button>
-                </form>
-            </div>
         </div>
     </main>
+
+    <!-- MODAL ADMIN -->
+    <div id="modalAdmin" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm hidden z-[200] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md shadow-2xl border border-white/10 overflow-hidden">
+            <div class="bg-blue-600 p-6 flex justify-between items-center text-white">
+                <h3 id="modalTitle" class="text-sm font-black uppercase tracking-widest">Configuração</h3>
+                <button onclick="closeModal()" class="text-2xl font-light">&times;</button>
+            </div>
+            <form id="adminForm" class="p-8 space-y-6">
+                <input type="hidden" id="formType">
+                <input type="hidden" id="editId">
+                <div>
+                    <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Descrição / Nome</label>
+                    <input type="text" id="inputNome" required class="input-base">
+                </div>
+                <div id="extraFields" class="hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Fase Macro</label>
+                            <select id="inputFase" class="input-base">
+                                <option>Planejamento</option><option>Produção</option><option>Revisão</option>
+                                <option>Análise</option><option>Execução</option><option>Aprovação</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">SLA (Dias Úteis)</label>
+                            <input type="number" id="inputPrazo" class="input-base">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="w-full btn-primary py-4">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
@@ -119,76 +113,53 @@
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
-            { title: 'Novo Processo', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
-            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
-            { title: 'Fornecedores', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
-            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
-            { title: 'Avaliação', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
-            { title: 'Contratos', icon: '<path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>', link: 'contratos.html' },
-            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>', link: 'pagamentos.html' },
-            { title: 'Relatórios', icon: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path><path d="M14 4v4h4"></path>', link: 'relatorios.html' },
+            { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
             { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
 
         async function init() {
             const nav = document.getElementById('globalNav');
-            if(nav) {
-                nav.innerHTML = menuItems.map(m => `
-                    <div class="nav-item ${m.link==='admin.html'?'active':''}" onclick="location.href='${m.link}'">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
-                        <span class="tooltip-text">${m.title}</span>
-                    </div>`).join('');
-            }
+            nav.innerHTML = menuItems.map(m => `
+                <div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
+                    <span class="tooltip">${m.title}</span>
+                </div>`).join('');
             loadEquipe();
             loadFluxo();
         }
 
         async function loadEquipe() {
-            const { data, error } = await sb.from('equipe').select('*').order('nome');
-            if (error) { 
-                console.error(error);
-                document.getElementById('listEquipe').innerHTML = '<div class="p-4 bg-red-500/10 text-red-400 text-[10px] uppercase font-bold rounded-xl border border-red-500/20 text-center">Erro ao acessar o banco. Verifique as tabelas.</div>'; 
-                return; 
-            }
-            document.getElementById('listEquipe').innerHTML = data.length ? data.map(r => `
-                <div class="list-item">
-                    <span class="text-xs font-bold text-white">${r.nome}</span>
+            const { data } = await sb.from('equipe').select('*').order('nome');
+            document.getElementById('listEquipe').innerHTML = data.map(r => `
+                <div class="list-card">
+                    <span class="font-bold text-sm text-slate-100">${r.nome}</span>
                     <div class="flex gap-4">
-                        <button onclick="editEquipe('${r.id}', '${r.nome}')" class="text-[10px] text-blue-400 font-black uppercase hover:underline">Editar</button>
-                        <button onclick="deleteItem('equipe', '${r.id}')" class="text-[10px] text-red-500 font-black uppercase hover:underline">Excluir</button>
+                        <button onclick="editEquipe('${r.id}', '${r.nome}')" class="text-[9px] font-black text-blue-400 uppercase hover:underline">Editar</button>
+                        <button onclick="deleteItem('equipe', '${r.id}')" class="text-[9px] font-black text-red-500 uppercase hover:underline">Excluir</button>
                     </div>
-                </div>`).join('') : '<div class="py-10 text-center opacity-20 uppercase font-black text-[10px]">Nenhum membro cadastrado.</div>';
+                </div>`).join('');
         }
 
         async function loadFluxo() {
-            const { data, error } = await sb.from('fluxo_etapas').select('*').order('ordem');
-            if (error) { 
-                console.error(error);
-                document.getElementById('listFluxo').innerHTML = '<div class="p-4 bg-red-500/10 text-red-400 text-[10px] uppercase font-bold rounded-xl border border-red-500/20 text-center">Erro ao acessar o banco. Verifique as tabelas.</div>'; 
-                return; 
-            }
-            document.getElementById('listFluxo').innerHTML = data.length ? data.map(e => `
-                <div class="list-item">
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${e.fase}</span>
-                        <span class="text-xs font-bold text-white leading-tight">${e.descricao}</span>
+            const { data } = await sb.from('fluxo_etapas').select('*').order('ordem');
+            document.getElementById('listFluxo').innerHTML = data.map(e => `
+                <div class="list-card">
+                    <div>
+                        <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${e.fase}</p>
+                        <p class="font-bold text-sm text-white">${e.descricao}</p>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="badge-prazo">${e.prazo_dias_uteis}d Úteis</span>
-                        <div class="flex gap-3 ml-4 border-l border-white/10 pl-4">
-                            <button onclick="editFluxo(${JSON.stringify(e).replace(/'/g, "&apos;")})" class="text-[10px] text-blue-400 font-black uppercase hover:underline">Editar</button>
-                            <button onclick="deleteItem('fluxo_etapas', '${e.id}')" class="text-[10px] text-red-500 font-black uppercase hover:underline">Excluir</button>
-                        </div>
+                        <span class="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded text-[10px] font-black">${e.prazo_dias_uteis}D</span>
+                        <button onclick="editFluxo(${JSON.stringify(e).replace(/'/g, "&apos;")})" class="text-[9px] font-black text-blue-400 uppercase">Editar</button>
                     </div>
-                </div>`).join('') : '<div class="py-10 text-center opacity-20 uppercase font-black text-[10px]">Nenhuma etapa cadastrada.</div>';
+                </div>`).join('');
         }
 
         function openModal(type) {
             document.getElementById('formType').value = type;
             document.getElementById('editId').value = '';
-            document.getElementById('modalTitle').innerText = type === 'equipe' ? 'Novo Responsável' : 'Nova Etapa do Fluxo';
-            document.getElementById('fieldsFluxo').classList.toggle('hidden', type !== 'fluxo');
-            document.getElementById('labelNome').innerText = type === 'equipe' ? 'Nome do Membro' : 'Descrição da Atividade';
+            document.getElementById('modalTitle').innerText = type === 'equipe' ? 'Novo Responsável' : 'Nova Etapa SLA';
+            document.getElementById('extraFields').classList.toggle('hidden', type !== 'fluxo');
             document.getElementById('modalAdmin').classList.remove('hidden');
         }
 
@@ -196,7 +167,6 @@
             openModal('equipe');
             document.getElementById('editId').value = id;
             document.getElementById('inputNome').value = nome;
-            document.getElementById('modalTitle').innerText = 'Editar Responsável';
         }
 
         function editFluxo(item) {
@@ -205,7 +175,6 @@
             document.getElementById('inputNome').value = item.descricao;
             document.getElementById('inputFase').value = item.fase;
             document.getElementById('inputPrazo').value = item.prazo_dias_uteis;
-            document.getElementById('modalTitle').innerText = 'Editar Etapa';
         }
 
         function closeModal() { document.getElementById('modalAdmin').classList.add('hidden'); document.getElementById('adminForm').reset(); }
@@ -216,39 +185,25 @@
             const id = document.getElementById('editId').value;
             const nome = document.getElementById('inputNome').value;
 
-            try {
-                if(type === 'equipe') {
-                    if(id) await sb.from('equipe').update({ nome }).eq('id', id);
-                    else await sb.from('equipe').insert([{ nome }]);
-                } else {
-                    const fase = document.getElementById('inputFase').value;
-                    const prazo = parseInt(document.getElementById('inputPrazo').value);
-                    if(id) {
-                        await sb.from('fluxo_etapas').update({ fase, descricao: nome, prazo_dias_uteis: prazo }).eq('id', id);
-                    } else {
-                        const { data: current } = await sb.from('fluxo_etapas').select('ordem');
-                        const nextOrdem = (current?.length || 0) + 1;
-                        await sb.from('fluxo_etapas').insert([{ fase, descricao: nome, prazo_dias_uteis: prazo, ordem: nextOrdem }]);
-                    }
-                }
-                closeModal();
-                loadEquipe();
-                loadFluxo();
-            } catch (err) { alert("Erro ao salvar dados."); }
+            if(type === 'equipe') {
+                if(id) await sb.from('equipe').update({ nome }).eq('id', id);
+                else await sb.from('equipe').insert([{ nome }]);
+            } else {
+                const fase = document.getElementById('inputFase').value;
+                const prazo = document.getElementById('inputPrazo').value;
+                if(id) await sb.from('fluxo_etapas').update({ fase, descricao: nome, prazo_dias_uteis: prazo }).eq('id', id);
+                else await sb.from('fluxo_etapas').insert([{ fase, descricao: nome, prazo_dias_uteis: prazo, ordem: 99 }]);
+            }
+            closeModal();
+            location.reload();
         }
 
         async function deleteItem(table, id) {
-            if(confirm('Atenção: A exclusão é permanente. Confirmar?')) {
-                const { error } = await sb.from(table).delete().eq('id', id);
-                if(!error) {
-                    loadEquipe();
-                    loadFluxo();
-                } else {
-                    alert("Erro ao excluir item.");
-                }
+            if(confirm('Excluir permanentemente?')) {
+                await sb.from(table).delete().eq('id', id);
+                location.reload();
             }
         }
-
         window.onload = init;
     </script>
 </body>
