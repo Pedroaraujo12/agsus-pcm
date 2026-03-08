@@ -9,21 +9,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; overflow: hidden; display: flex; flex-direction: column; }
-        @media (min-width: 1024px) { body { flex-direction: row; } }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
-        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; }
-        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; } }
-        .nav-item { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 16px; color: #64748b; cursor: pointer; transition: 0.3s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+        @media (min-width: 1024px) { body { flex-direction: row; overflow: hidden; } }
+        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; overflow-x: auto; }
+        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; overflow-x: hidden; } }
+        .nav-item { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748b; transition: all 0.3s; cursor: pointer; flex-shrink: 0; }
+        @media (min-width: 1024px) { .nav-item { margin-bottom: 16px; width: 44px; height: 44px; } }
         .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        .nav-item::after { content: attr(data-title); position: absolute; left: 60px; background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
+        .nav-item::after { content: attr(data-title); position: absolute; left: 60px; background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 200; }
         @media (min-width: 1024px) { .nav-item:hover::after { opacity: 1; left: 70px; } }
-        .main-container { flex: 1; padding: 32px; overflow-y: auto; }
+        .main-container { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
+        @media (min-width: 1024px) { .main-container { padding: 32px; height: 100vh; } }
         .status-badge { font-size: 10px; padding: 6px 14px; border-radius: 20px; font-weight: 800; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .vencedora { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+        .desclassificada { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
         .action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; transition: 0.2s; }
         .action-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
         .action-btn.delete:hover { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
-        ::-webkit-scrollbar { width: 5px; }
+        .action-btn.winner:hover { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+        .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; font-size: 12px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
@@ -31,28 +37,39 @@
 
     <!-- SIDEBAR -->
     <aside class="sidebar glass-card">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-110">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
+        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
     </aside>
 
     <main class="main-container">
         <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Julgamento & Seleção</p>
-                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Módulo de Propostas</h1>
+                <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">Julgamento & Seleção</p>
+                <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight leading-none">Módulo de <br class="md:hidden"> Propostas</h1>
             </div>
-            <button onclick="document.getElementById('modalLance').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg> Registrar Proposta
-            </button>
+            <div class="flex gap-3 w-full md:w-auto">
+                <button onclick="document.getElementById('modalLance').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg> Registrar Proposta
+                </button>
+            </div>
         </header>
 
         <div class="glass-card rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div class="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
-                <div class="flex flex-col gap-1">
-                    <select id="selectProcesso" class="bg-transparent border-none text-sm font-black uppercase text-slate-100 outline-none cursor-pointer hover:text-blue-400 transition">
+            <div class="p-8 border-b border-white/5 bg-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex flex-col gap-1 w-full sm:w-auto">
+                    <select id="selectProcesso" class="bg-slate-800/50 border border-white/10 rounded-xl px-4 py-2 text-sm font-black uppercase text-slate-100 outline-none cursor-pointer hover:border-blue-500 transition w-full sm:w-64">
                         <option value="">Selecione um Processo...</option>
                     </select>
-                    <span id="totalLabel" class="text-[10px] font-bold text-slate-500 tracking-widest">TOTAL DE PROPOSTAS: 0</span>
+                    <span id="totalLabel" class="text-[10px] font-bold text-slate-500 tracking-widest mt-2 px-1">TOTAL DE PROPOSTAS: 0</span>
+                </div>
+                <div id="statsProcesso" class="hidden flex gap-4">
+                    <div class="text-right">
+                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Menor Preço</p>
+                        <p id="minPrice" class="text-sm font-black text-emerald-400">R$ 0,00</p>
+                    </div>
                 </div>
             </div>
 
@@ -67,7 +84,7 @@
                         </tr>
                     </thead>
                     <tbody id="propostaTable" class="text-[11px] divide-y divide-white/5">
-                        <!-- Conteúdo real -->
+                        <tr><td colspan="4" class="py-20 text-center opacity-30 uppercase font-black tracking-widest text-[10px]">Aguardando seleção de processo...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -76,13 +93,30 @@
 
     <!-- MODAL REGISTRAR LANCE -->
     <div id="modalLance" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase">Novo Registro de Lance</h2><button onclick="document.getElementById('modalLance').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
+        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Novo Registro de Lance</h2><button onclick="document.getElementById('modalLance').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
             <form id="lanceForm" class="p-8 space-y-6">
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Processo</label><select id="l_proc" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Fornecedor</label><select id="l_forn" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Valor (R$)</label><input type="number" id="l_val" step="0.01" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></div>
-                <button type="submit" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs">Salvar Proposta</button>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Processo</label><select id="l_proc" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Fornecedor</label><select id="l_forn" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Valor (R$)</label><input type="number" id="l_val" step="0.01" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white" placeholder="0.00"></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Proposta no Banco</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR LANCE -->
+    <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Registro de Lance</h2><button onclick="document.getElementById('modalEdit').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
+            <form id="editForm" class="p-8 space-y-6">
+                <input type="hidden" id="edit_id">
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Fornecedor</label><input type="text" id="edit_forn" readonly class="form-input opacity-50"></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Valor (R$)</label><input type="number" id="edit_val" step="0.01" required class="form-input"></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Status de Julgamento</label><select id="edit_stat" class="form-input"><option value="Recebida">Recebida</option><option value="Em Análise">Em Análise</option><option value="Vencedora">Vencedora</option><option value="Desclassificada">Desclassificada</option></select></div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest transition border border-white/5">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
+                </div>
             </form>
         </div>
     </div>
@@ -94,47 +128,130 @@
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
-            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' }
+            { title: 'Novo Processo', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
+            { title: 'Fornecedores', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
+            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
+            { title: 'Avaliação', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
+            { title: 'Contratos', icon: '<path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>', link: 'contratos.html' },
+            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>', link: 'pagamentos.html' },
+            { title: 'Relatórios', icon: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path><path d="M14 4v4h4"></path>', link: 'relatorios.html' }
         ];
 
         async function init() {
-            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" data-title="${m.title}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg></div>`).join('');
+            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='propostas.html'?'active':''}" data-title="${m.title}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg></div>`).join('');
+            
             const { data: ps } = await sb.from('licitacoes').select('id_processo');
             const { data: fs } = await sb.from('fornecedores').select('id, razao_social');
+            
             const selP = document.getElementById('selectProcesso');
             const lProc = document.getElementById('l_proc');
             const lForn = document.getElementById('l_forn');
-            ps.forEach(p => { selP.add(new Option(p.id_processo, p.id_processo)); lProc.add(new Option(p.id_processo, p.id_processo)); });
+            
+            ps.forEach(p => { 
+                selP.add(new Option(p.id_processo, p.id_processo)); 
+                lProc.add(new Option(p.id_processo, p.id_processo)); 
+            });
             fs.forEach(f => lForn.add(new Option(f.razao_social, f.id)));
+            
             selP.onchange = (e) => loadData(e.target.value);
         }
 
         async function loadData(pid) {
-            if(!pid) return;
+            if(!pid) {
+                document.getElementById('propostaTable').innerHTML = '<tr><td colspan="4" class="py-20 text-center opacity-30 uppercase font-black tracking-widest text-[10px]">Aguardando seleção de processo...</td></tr>';
+                document.getElementById('totalLabel').innerText = 'TOTAL DE PROPOSTAS: 0';
+                document.getElementById('statsProcesso').classList.add('hidden');
+                return;
+            }
+
             const { data } = await sb.from('propostas').select('*, fornecedores(razao_social)').eq('processo_id', pid).order('valor_proposta');
+            
             document.getElementById('totalLabel').innerText = `TOTAL DE PROPOSTAS: ${data.length}`;
-            document.getElementById('propostaTable').innerHTML = data.map(p => `
+            
+            if(data.length > 0) {
+                const minVal = Math.min(...data.map(p => p.valor_proposta));
+                document.getElementById('minPrice').innerText = minVal.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
+                document.getElementById('statsProcesso').classList.remove('hidden');
+            } else {
+                document.getElementById('statsProcesso').classList.add('hidden');
+            }
+
+            document.getElementById('propostaTable').innerHTML = data.length ? data.map(p => {
+                let statusClass = '';
+                if(p.status_julgamento === 'Vencedora') statusClass = 'vencedora';
+                if(p.status_julgamento === 'Desclassificada') statusClass = 'desclassificada';
+
+                return `
                 <tr class="hover:bg-white/5 transition">
-                    <td class="px-6 py-8">
-                        <div class="font-bold text-slate-100 text-[12px] uppercase">${p.fornecedores.razao_social}</div>
-                        <div class="font-black text-slate-400 text-[10px] mt-1">R$ ${parseFloat(p.valor_proposta).toLocaleString('pt-br')}</div>
+                    <td class="px-6 py-6">
+                        <div class="font-black text-slate-100 text-[12px] uppercase tracking-tight">${p.fornecedores?.razao_social || 'N/I'}</div>
+                        <div class="font-black text-slate-400 text-[10px] mt-1 tracking-widest">R$ ${parseFloat(p.valor_proposta||0).toLocaleString('pt-br')}</div>
                     </td>
-                    <td class="px-6 py-8 text-slate-300 font-bold">${new Date(p.data_lance).toLocaleDateString('pt-br')}</td>
-                    <td class="px-6 py-8 text-center"><span class="status-badge text-slate-100">${p.status_julgamento || 'Recebida'}</span></td>
-                    <td class="px-6 py-8">
-                        <div class="flex justify-center gap-3">
-                            <button class="action-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></button>
-                            <button class="action-btn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-                            <button class="action-btn delete"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    <td class="px-6 py-6 text-slate-400 font-bold">${p.data_lance ? new Date(p.data_lance).toLocaleDateString('pt-br') : '--/--/--'}</td>
+                    <td class="px-6 py-6 text-center">
+                        <span class="status-badge ${statusClass}">${p.status_julgamento || 'Recebida'}</span>
+                    </td>
+                    <td class="px-6 py-6">
+                        <div class="flex justify-center gap-2">
+                            <button onclick='quickWinner("${p.id}")' class="action-btn winner" title="Marcar como Vencedora"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></button>
+                            <button onclick='openEdit(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="action-btn" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                            <button onclick="deleteLance('${p.id}')" class="action-btn delete" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                         </div>
                     </td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('') : '<tr><td colspan="4" class="py-20 text-center opacity-30 uppercase font-black tracking-widest text-[10px]">Nenhuma proposta cadastrada para este processo.</td></tr>';
+        }
+
+        async function quickWinner(id) {
+            const { error } = await sb.from('propostas').update({ status_julgamento: 'Vencedora' }).eq('id', id);
+            if(!error) loadData(document.getElementById('selectProcesso').value);
+        }
+
+        function openEdit(p) {
+            document.getElementById('edit_id').value = p.id;
+            document.getElementById('edit_forn').value = p.fornecedores?.razao_social || 'N/I';
+            document.getElementById('edit_val').value = p.valor_proposta;
+            document.getElementById('edit_stat').value = p.status_julgamento || 'Recebida';
+            document.getElementById('modalEdit').classList.remove('hidden');
+        }
+
+        document.getElementById('editForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_id').value;
+            const payload = {
+                valor_proposta: document.getElementById('edit_val').value,
+                status_julgamento: document.getElementById('edit_stat').value
+            };
+            const { error } = await sb.from('propostas').update(payload).eq('id', id);
+            if(!error) {
+                document.getElementById('modalEdit').classList.add('hidden');
+                loadData(document.getElementById('selectProcesso').value);
+            }
+        }
+
+        async function deleteLance(id) {
+            if(confirm('Atenção: Deseja excluir esta proposta permanentemente do sistema?')) {
+                const { error } = await sb.from('propostas').delete().eq('id', id);
+                if(!error) loadData(document.getElementById('selectProcesso').value);
+            }
         }
 
         document.getElementById('lanceForm').onsubmit = async (e) => {
             e.preventDefault();
-            await sb.from('propostas').insert([{ processo_id: document.getElementById('l_proc').value, fornecedor_id: document.getElementById('l_forn').value, valor_proposta: document.getElementById('l_val').value }]);
-            location.reload();
+            const pid = document.getElementById('l_proc').value;
+            const payload = { 
+                processo_id: pid, 
+                fornecedor_id: document.getElementById('l_forn').value, 
+                valor_proposta: document.getElementById('l_val').value,
+                data_lance: new Date().toISOString()
+            };
+            const { error } = await sb.from('propostas').insert([payload]);
+            if(!error) {
+                document.getElementById('modalLance').classList.add('hidden');
+                document.getElementById('selectProcesso').value = pid;
+                loadData(pid);
+            }
         }
         init();
     </script>
