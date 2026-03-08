@@ -15,17 +15,13 @@
         
         .glass-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
         
-        /* SIDEBAR GLASS */
         .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; flex-shrink: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); }
         @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; } }
         
         .nav-item { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 14px; margin-bottom: 12px; color: #64748b; transition: all 0.3s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transform: scale(1.05); }
         
-        /* LEGENDAS (TOOLTIPS) */
-        .nav-item .tooltip {
-            visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: 0.2s; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); letter-spacing: 0.05em;
-        }
+        .nav-item .tooltip { visibility: hidden; position: absolute; background: #1e293b; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; opacity: 0; transition: 0.2s; pointer-events: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); letter-spacing: 0.05em; }
         @media (min-width: 1024px) { .nav-item .tooltip { left: 140%; top: 50%; transform: translateY(-50%); } .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
 
         .main-content { flex: 1; padding: 24px; overflow-y: auto; height: 100vh; }
@@ -45,7 +41,6 @@
 </head>
 <body class="flex">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
@@ -63,15 +58,13 @@
             </div>
         </header>
 
-        <!-- INDICADORES GLASS -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-6 clickable" onclick="filterByPrazo('Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos</p><h3 id="stat_procs" class="text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6 clickable" onclick="filterByField('prazo', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos</p><h3 id="stat_procs" class="text-3xl font-black">--</h3></div>
             <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-lg font-black truncate">R$ 0,00</h3></div>
-            <div class="glass-card p-6 text-emerald-400 border-l-4 border-emerald-500"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Savings</p><h3 id="stat_save" class="text-lg font-black truncate">R$ 0,00</h3></div>
-            <div class="glass-card p-6 text-red-100 border-l-4 border-red-500 clickable" onclick="filterByPrazo('Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Savings</p><h3 id="stat_save" class="text-lg font-black truncate">R$ 0,00</h3></div>
+            <div class="glass-card p-6 text-red-100 border-l-4 border-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-3xl font-black">--</h3></div>
         </div>
 
-        <!-- FILTROS -->
         <div class="glass-card p-4 rounded-2xl mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
             <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar objeto ou ID..." class="form-input bg-slate-800/40">
             <select id="f-prazo" onchange="runFilters()" class="form-input"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
@@ -82,7 +75,6 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- TABELA DINÂMICA -->
             <div class="lg:col-span-2 glass-card overflow-hidden">
                 <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
                     <h2 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Processos Ativos</h2>
@@ -104,7 +96,6 @@
                 </div>
             </div>
 
-            <!-- GRÁFICOS ANALÍTICOS -->
             <div class="space-y-6">
                 <div class="glass-card p-6 h-[240px]"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-4 tracking-widest">Responsáveis</h3><canvas id="chartResp"></canvas></div>
                 <div class="glass-card p-6 h-[240px]"><h3 class="text-[10px] font-black uppercase text-blue-400 mb-4 tracking-widest">Modalidades</h3><canvas id="chartMod"></canvas></div>
@@ -113,7 +104,6 @@
         </div>
     </main>
 
-    <!-- MODAL DETALHES -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
             <div id="modalContent" class="p-8 space-y-4"></div>
@@ -124,7 +114,6 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR -->
     <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
             <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
@@ -172,39 +161,24 @@
         }
 
         async function init() {
-            // Sidebar Premium com Legendas
             const nav = document.getElementById('globalNav');
-            nav.innerHTML = menuItems.map(m => `
-                <div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
-                    <span class="tooltip">${m.title}</span>
-                </div>`).join('');
+            nav.innerHTML = menuItems.map(m => `<div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
 
-            // Carregar Dados Admin
             const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
             const { data: equipe } = await sb.from('equipe').select('*').order('nome');
             globalEtapas = etapas || []; globalEquipe = equipe || [];
 
-            // Preencher Filtros Dinâmicos
             const fFase = document.getElementById('f-fase');
             globalEtapas.forEach(e => fFase.add(new Option(e.descricao, e.descricao)));
             const fResp = document.getElementById('f-responsavel');
             globalEquipe.forEach(r => fResp.add(new Option(r.nome, r.nome)));
 
-            // Carregar Licitacoes Realtime
             const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
-            if (error) { console.error(error); return; }
             rawData = data || [];
             updateView(rawData);
 
-            // Outros filtros
             const getUnique = (key) => [...new Set(rawData.map(i => i[key]).filter(Boolean))].sort();
-            const fMod = document.getElementById('f-modalidade');
-            getUnique('modalidade').forEach(v => fMod.add(new Option(v, v)));
-
-            document.body.classList.remove('overflow-hidden');
-            const loader = document.getElementById('loadingOverlay');
-            if(loader) loader.style.display = 'none';
+            getUnique('modalidade').forEach(v => document.getElementById('f-modalidade').add(new Option(v, v)));
         }
 
         function runFilters() {
@@ -229,9 +203,9 @@
             updateView(filtered);
         }
 
-        function filterByPrazo(type) {
-            document.getElementById('f-prazo').value = type;
-            runFilters();
+        function filterByField(field, value) {
+            const el = document.getElementById(`f-${field}`);
+            if(el) { el.value = value; runFilters(); }
         }
 
         function clearAllFilters() {
@@ -284,7 +258,9 @@
             const modData = countBy('modalidade');
             charts.mod = new Chart(document.getElementById('chartMod'), {
                 type: 'doughnut', data: { labels: Object.keys(modData), datasets: [{ data: Object.values(modData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 9 }, usePointStyle: true } } } }
+                options: { maintainAspectRatio: false, 
+                    onClick: (e, activeEls) => { if (activeEls.length > 0) { filterByField('modalidade', Object.keys(modData)[activeEls[0].index]); } },
+                    plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 9 }, usePointStyle: true } } } }
             });
 
             // 2. Responsáveis (Bar Horiz)
@@ -292,7 +268,9 @@
             const resData = countBy('responsavel');
             charts.resp = new Chart(document.getElementById('chartResp'), {
                 type: 'bar', data: { labels: Object.keys(resData), datasets: [{ data: Object.values(resData), backgroundColor: '#3b82f6', borderRadius: 4 }] },
-                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } }
+                options: { indexAxis: 'y', maintainAspectRatio: false, 
+                    onClick: (e, activeEls) => { if (activeEls.length > 0) { filterByField('responsavel', Object.keys(resData)[activeEls[0].index]); } },
+                    plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } }
             });
 
             // 3. Saúde Prazos (Bar Vert)
@@ -301,7 +279,9 @@
             data.forEach(i => { const l = getAging(i.data_prevista).label; if(l.includes('OK')) s.ok++; else if(l.includes('Alerta')) s.alert++; else s.late++; });
             charts.stat = new Chart(document.getElementById('chartStatus'), {
                 type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } }
+                options: { maintainAspectRatio: false, 
+                    onClick: (e, activeEls) => { if (activeEls.length > 0) { const labels = ['No Prazo', 'Alerta', 'Atrasados']; filterByField('prazo', labels[activeEls[0].index]); } },
+                    plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } }
             });
         }
 
@@ -321,41 +301,15 @@
 
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
-            const payload = { 
-                objeto_resumido: document.getElementById('edit_objeto').value, 
-                responsavel: document.getElementById('edit_resp').value, 
-                fase_atual: document.getElementById('edit_fase').value, 
-                vlr_estimado_anual: document.getElementById('edit_val').value, 
-                vlr_homologado: document.getElementById('edit_hom').value 
-            };
+            const payload = { objeto_resumido: document.getElementById('edit_objeto').value, responsavel: document.getElementById('edit_resp').value, fase_atual: document.getElementById('edit_fase').value, vlr_estimado_anual: document.getElementById('edit_val').value, vlr_homologado: document.getElementById('edit_hom').value };
             await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
             location.reload();
         }
 
         function openDetails(id) {
             const item = rawData.find(x => x.id_processo === id);
-            document.getElementById('modalContent').innerHTML = `
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-black text-white uppercase tracking-tight">${item.id_processo}</h2>
-                    <span class="status-badge">${item.status}</span>
-                </div>
-                <div class="glass-card p-6 bg-white/5 border-white/10 mb-6">
-                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Objeto da Contratação</p>
-                    <p class="text-sm font-medium leading-relaxed text-slate-100">${item.objeto_resumido}</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-4 rounded-xl bg-white/5 border border-white/10">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p>
-                        <p class="font-black text-xs">${item.responsavel||'N/I'}</p>
-                    </div>
-                    <div class="p-4 rounded-xl bg-white/5 border border-white/10">
-                        <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase SLA</p>
-                        <p class="font-black text-xs text-indigo-400">${item.fase_atual||'N/I'}</p>
-                    </div>
-                </div>`;
-            const btn = document.getElementById('btnSEI');
-            if(item.processo_link) { btn.classList.remove('hidden'); btn.onclick = () => window.open(item.processo_link, '_blank'); }
-            else btn.classList.add('hidden');
+            document.getElementById('modalContent').innerHTML = `<div class="flex justify-between items-start mb-6"><h2 class="text-2xl font-black text-white uppercase tracking-tight">${item.id_processo}</h2><span class="status-badge">${item.status}</span></div><div class="glass-card p-6 bg-white/5 border-white/10 mb-6"><p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Objeto da Contratação</p><p class="text-sm font-medium leading-relaxed text-slate-100">${item.objeto_resumido}</p></div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl bg-white/5 border border-white/10"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Responsável</p><p class="font-black text-xs">${item.responsavel||'N/I'}</p></div><div class="p-4 rounded-xl bg-white/5 border border-white/10"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase SLA</p><p class="font-black text-xs text-indigo-400">${item.fase_atual||'N/I'}</p></div></div>`;
+            const btn = document.getElementById('btnSEI'); if(item.processo_link) { btn.classList.remove('hidden'); btn.onclick = () => window.open(item.processo_link, '_blank'); } else btn.classList.add('hidden');
             document.getElementById('modalDetails').classList.remove('hidden');
         }
 
