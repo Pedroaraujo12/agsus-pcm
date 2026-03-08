@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); --accent: #3b82f6; }
+        :root { --glass: rgba(15, 23, 42, 0.7); --accent: #3b82f6; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto; }
         @media (min-width: 1024px) { body { flex-direction: row; } }
         .glass-card { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; }
@@ -30,6 +30,7 @@
         table { width: 100%; min-width: 700px; border-collapse: separate; border-spacing: 0 8px; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .row-hover:hover { background: rgba(255,255,255,0.03); }
         .clickable:hover { transform: translateY(-3px); transition: 0.2s; }
     </style>
 </head>
@@ -38,7 +39,6 @@
     <aside class="sidebar">
         <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
     </aside>
 
     <main class="main-content">
@@ -52,7 +52,7 @@
 
         <!-- INDICADORES -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            <div class="glass-card p-6 clickable" onclick="filterByField('prazo', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
+            <div class="glass-card p-6 clickable" onclick="filterByField('fase', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Processos Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
             <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
             <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500 clickable" onclick="filterByField('fase', 'Concluído')"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Concluídos</p><h3 id="stat_done" class="text-2xl md:text-4xl font-black text-emerald-100">--</h3></div>
             <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
@@ -69,6 +69,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <!-- TABELA -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="glass-card overflow-hidden h-fit">
                     <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
@@ -92,6 +93,7 @@
                 </div>
             </div>
 
+            <!-- ANALYTICS -->
             <div class="space-y-6">
                 <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-6 tracking-widest text-center">Carga da Equipe Ativa</h3><canvas id="chartResp"></canvas></div>
                 <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-blue-400 mb-6 tracking-widest text-center">Modalidades</h3><canvas id="chartMod"></canvas></div>
@@ -101,6 +103,7 @@
         <div class="h-20"></div>
     </main>
 
+    <!-- MODAL DETALHES -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
             <div id="modalContent" class="p-8 space-y-4"></div>
@@ -111,6 +114,7 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR -->
     <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
             <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
@@ -127,7 +131,7 @@
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_val" class="form-input"></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_hom" class="form-input"></div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
+                <button type="submit" id="btnSave" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
             </form>
         </div>
     </div>
@@ -141,7 +145,6 @@
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
             { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
-            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
             { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
 
@@ -251,8 +254,25 @@
 
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
-            await sb.from('licitacoes').update({ objeto_resumido: document.getElementById('edit_objeto').value, processo_link: document.getElementById('edit_link').value, responsavel: document.getElementById('edit_resp').value, fase_atual: document.getElementById('edit_fase').value, vlr_estimado_anual: document.getElementById('edit_val').value, vlr_homologado: document.getElementById('edit_hom').value }).eq('id_processo', document.getElementById('edit_id_pk').value);
-            location.reload();
+            const btn = document.getElementById('btnSave');
+            btn.innerText = "SALVANDO...";
+            btn.disabled = true;
+            try {
+                const payload = { 
+                    objeto_resumido: document.getElementById('edit_objeto').value, 
+                    processo_link: document.getElementById('edit_link').value, 
+                    responsavel: document.getElementById('edit_resp').value, 
+                    fase_atual: document.getElementById('edit_fase').value, 
+                    vlr_estimado_anual: document.getElementById('edit_val').value, 
+                    vlr_homologado: document.getElementById('edit_hom').value 
+                };
+                await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
+                location.reload();
+            } catch (err) {
+                alert("Erro ao salvar.");
+                btn.innerText = "SALVAR ALTERAÇÕES";
+                btn.disabled = false;
+            }
         }
 
         function openDetails(id) {
