@@ -40,7 +40,17 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label>Responsável pelo Processo</label>
+                    <select id="responsavel" class="form-input">
+                        <option value="Pedro Silva">Pedro Silva</option>
+                        <option value="Gorete Pereira">Gorete Pereira</option>
+                        <option value="Roberto (IA)">Roberto (IA)</option>
+                        <option value="NAAGE">NAAGE</option>
+                        <option value="Diretoria">Diretoria</option>
+                    </select>
+                </div>
                 <div>
                     <label>Demandante</label>
                     <select id="demandante" class="form-input">
@@ -50,6 +60,9 @@
                         <option value="INFRA">Infraestrutura</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label>Modalidade</label>
                     <select id="modalidade" class="form-input">
@@ -109,6 +122,7 @@
             const payload = {
                 id_processo: document.getElementById('id_processo').value,
                 objeto_resumido: document.getElementById('objeto_resumido').value,
+                responsavel: document.getElementById('responsavel').value,
                 demandante: document.getElementById('demandante').value,
                 modalidade: document.getElementById('modalidade').value,
                 prioridade: document.getElementById('prioridade').value,
