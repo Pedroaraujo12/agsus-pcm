@@ -180,12 +180,24 @@
         function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
         function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
 
-        function getAging(dateStr, fase) {
-            if (fase === 'Concluído') return { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' };
+        function getAging(dateStr, status) {
+            if (status === 'Concluído') return { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' };
             if (!dateStr || dateStr === 'None') return { label: 'N/A', class: 'bg-slate-800 text-slate-500' };
-            let iso = dateStr; if (dateStr.includes('/')) { const p = dateStr.split('/'); iso = `${p[2]}-${p[1]}-${p[0]}`; }
-            const target = new Date(iso.split('T')[0]); const today = new Date(); today.setHours(0,0,0,0);
-            const diff = Math.ceil((target - today) / 86400000);
+            
+            let iso = dateStr;
+            if (dateStr.includes('/')) {
+                const p = dateStr.split('/');
+                iso = `${p[2]}-${p[1]}-${p[0]}`;
+            }
+            
+            const target = new Date(iso.split('T')[0] + 'T12:00:00');
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const targetTime = target.getTime();
+            const todayTime = today.getTime();
+            const diff = Math.ceil((targetTime - todayTime) / 86400000);
+
             if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'bg-red-500/10 text-red-500' };
             if (diff <= 2) return { label: `Vence ${diff}d`, class: 'bg-amber-500/10 text-amber-500' };
             return { label: `SLA OK`, class: 'bg-emerald-500/10 text-emerald-500' };
@@ -268,17 +280,21 @@
             const table = document.getElementById('mainTable');
             if(table) {
                 table.innerHTML = data.map(i => {
-                    const aging = getAging(i.data_prevista, i.fase_atual);
+                    const aging = getAging(i.data_prevista, i.status);
                     const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
+                    
+                    const dtPrevStr = i.data_prevista ? new Date(i.data_prevista + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+                    const dtFinalStr = i.data_entrega_final ? new Date(i.data_entrega_final + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+
                     return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
                         <td class="p-4 font-black text-blue-400">${processIdHtml}</td>
                         <td class="p-4"><div class="font-bold text-slate-100 text-sm">${i.fase_atual || 'N/I'}</div><div class="text-[10px] text-slate-400 uppercase truncate max-w-[200px] font-semibold">${i.objeto_resumido}</div></td>
                         <td class="p-4 text-center">
                             <span class="aging-badge ${aging.class}">${aging.label}</span>
-                            <div class="text-[10px] text-slate-500 mt-1 font-bold">${i.data_prevista ? new Date(i.data_prevista).toLocaleDateString('pt-BR') : '-'}</div>
+                            <div class="text-[10px] text-slate-500 mt-1 font-bold">${dtPrevStr}</div>
                         </td>
                         <td class="p-4 text-center font-black text-slate-200 text-sm">
-                            ${i.data_entrega_final ? new Date(i.data_entrega_final).toLocaleDateString('pt-BR') : '-'}
+                            ${dtFinalStr}
                         </td>
                         <td class="p-4 text-right font-black text-slate-100 text-sm">${formatBRL(i.vlr_estimado_anual)}</td>
                         <td class="p-4 text-center"><div class="flex justify-center gap-3"><button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td>
