@@ -55,13 +55,19 @@
             <div class="glass-card p-6 clickable" onclick="filterByField('fase', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
             <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
             <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500 clickable" onclick="filterByField('fase', 'Concluído')"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Concluídos</p><h3 id="stat_done" class="text-2xl md:text-4xl font-black text-emerald-100">--</h3></div>
-            <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
+            <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('status', 'Atrasado')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
         </div>
 
         <!-- FILTROS -->
         <div class="glass-card p-4 rounded-2xl mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
             <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar objeto ou ID..." class="form-input bg-slate-800/40">
-            <select id="f-prazo" onchange="runFilters()" class="form-input"><option value="Todos">Prazo</option><option value="Atrasados">Atrasados</option><option value="No Prazo">No Prazo</option></select>
+            <select id="f-status" onchange="runFilters()" class="form-input">
+                <option value="Todos">Status</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Concluído">Concluído</option>
+                <option value="Suspenso">Suspenso</option>
+                <option value="Cancelado">Cancelado</option>
+            </select>
             <select id="f-responsavel" onchange="runFilters()" class="form-input"><option value="Todos">Responsável</option></select>
             <select id="f-modalidade" onchange="runFilters()" class="form-input"><option value="Todos">Modalidade</option></select>
             <select id="f-fase" onchange="runFilters()" class="form-input"><option value="Todos">Etapa (SLA)</option></select>
@@ -194,17 +200,13 @@
             const f = document.getElementById('f-fase').value;
             const r = document.getElementById('f-responsavel').value;
             const m = document.getElementById('f-modalidade').value;
-            const p = document.getElementById('f-prazo').value;
+            const st = document.getElementById('f-status').value;
             const filtered = rawData.filter(i => {
                 if (s && !(String(i.objeto_resumido||"") + String(i.id_processo||"")).toLowerCase().includes(s)) return false;
                 if (f !== 'Todos' && i.fase_atual !== f) return false;
                 if (r !== 'Todos' && i.responsavel !== r) return false;
                 if (m !== 'Todos' && i.modalidade !== m) return false;
-                if (p !== 'Todos') {
-                    const ag = getAging(i.data_prevista, i.fase_atual);
-                    if (p === 'Atrasados' && !ag.label.includes('Atrasado')) return false;
-                    if (p === 'No Prazo' && ag.label.includes('Atrasado')) return false;
-                }
+                if (st !== 'Todos' && i.status !== st) return false;
                 return true;
             });
             updateView(filtered);
@@ -214,7 +216,14 @@
             const el = document.getElementById(`f-${field}`);
             if(el) { el.value = value; runFilters(); }
         }
-        function clearAllFilters() { document.getElementById('searchBox').value = ''; document.getElementById('f-prazo').value = 'Todos'; document.getElementById('f-responsavel').value = 'Todos'; document.getElementById('f-modalidade').value = 'Todos'; document.getElementById('f-fase').value = 'Todos'; runFilters(); }
+        function clearAllFilters() { 
+            document.getElementById('searchBox').value = ''; 
+            document.getElementById('f-status').value = 'Todos'; 
+            document.getElementById('f-responsavel').value = 'Todos'; 
+            document.getElementById('f-modalidade').value = 'Todos'; 
+            document.getElementById('f-fase').value = 'Todos'; 
+            runFilters(); 
+        }
 
         function updateView(data) {
             const ativos = data.filter(i => i.fase_atual !== 'Concluído');
@@ -261,7 +270,7 @@
             if (cStatus) {
                 const s = { ok: 0, alert: 0, late: 0 };
                 ativos.forEach(i => { const l = getAging(i.data_prevista, i.fase_atual).label; if(l.includes('OK')) s.ok++; else if(l.includes('Vence')) s.alert++; else if(l.includes('Atrasado')) s.late++; });
-                charts.stat = new Chart(cStatus, { type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('prazo', ['No Prazo', 'Alerta', 'Atrasados'][activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } } });
+                charts.stat = new Chart(cStatus, { type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('status', ['No Prazo', 'Alerta', 'Atrasado'][activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } } });
             }
         }
 
