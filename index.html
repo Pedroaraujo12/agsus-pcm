@@ -136,6 +136,21 @@
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Responsável</label><select id="edit_resp" class="form-input"></select></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Etapa Atual</label><select id="edit_fase" class="form-input"></select></div>
                 </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status (Coluna D)</label>
+                    <select id="edit_status" class="form-input">
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="Não recebido">Não recebido</option>
+                        <option value="Em Instrução">Em Instrução</option>
+                        <option value="Publicado">Publicado</option>
+                        <option value="Homologado">Homologado</option>
+                        <option value="Suspenso">Suspenso</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Pendente de assinatura">Pendente de assinatura</option>
+                        <option value="Devolvido">Devolvido</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_val" class="form-input"></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_hom" class="form-input"></div>
@@ -290,6 +305,7 @@
             document.getElementById('edit_link').value = item.processo_link || "";
             document.getElementById('edit_resp').value = item.responsavel || "";
             document.getElementById('edit_fase').value = item.fase_atual || "";
+            if(document.getElementById('edit_status')) document.getElementById('edit_status').value = item.status || "Em andamento";
             document.getElementById('edit_val').value = cleanNum(item.vlr_estimado_anual);
             document.getElementById('edit_hom').value = cleanNum(item.vlr_homologado);
             document.getElementById('modalEdit').classList.remove('hidden');
@@ -300,7 +316,15 @@
             const btn = document.getElementById('btnSave');
             btn.innerText = "SALVANDO..."; btn.disabled = true;
             try {
-                const payload = { objeto_resumido: document.getElementById('edit_objeto').value, processo_link: document.getElementById('edit_link').value, responsavel: document.getElementById('edit_resp').value, fase_atual: document.getElementById('edit_fase').value, vlr_estimado_anual: document.getElementById('edit_val').value, vlr_homologado: document.getElementById('edit_hom').value };
+                const payload = { 
+                    objeto_resumido: document.getElementById('edit_objeto').value, 
+                    processo_link: document.getElementById('edit_link').value, 
+                    responsavel: document.getElementById('edit_resp').value, 
+                    fase_atual: document.getElementById('edit_fase').value, 
+                    status: document.getElementById('edit_status').value,
+                    vlr_estimado_anual: document.getElementById('edit_val').value, 
+                    vlr_homologado: document.getElementById('edit_hom').value 
+                };
                 await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
                 location.reload();
             } catch (err) { alert("Erro."); btn.innerText = "SALVAR"; btn.disabled = false; }
