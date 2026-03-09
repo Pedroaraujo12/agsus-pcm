@@ -344,7 +344,6 @@
                         if (!d || d === 'None' || d === '') return '-';
                         const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
                         if (parts.length !== 3) return '-';
-                        // Assume YYYY-MM-DD do banco
                         return `${parts[2]}/${parts[1]}/${parts[0]}`;
                     };
 
