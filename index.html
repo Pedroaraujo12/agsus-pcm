@@ -267,6 +267,7 @@
             runFilters(); 
         }
 
+        function updateView(data) {
             const ativos = data.filter(i => i.status !== 'Concluído' && i.status !== 'Cancelado');
             const concluidos = data.filter(i => i.status === 'Concluído');
             const cancelados = data.filter(i => i.status === 'Cancelado');
@@ -283,7 +284,6 @@
             
             const table = document.getElementById('mainTable');
             if(table) {
-                // USA O DATA FILTRADO PELOS DROPDOWNS (que já vem como argumento 'data')
                 table.innerHTML = data.map(i => {
                     const aging = getAging(i.data_prevista, i.status);
                     const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
@@ -293,7 +293,10 @@
 
                     return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
                         <td class="p-4 font-black text-blue-400">${processIdHtml}</td>
-                        <td class="p-4"><div class="font-bold text-slate-100 text-sm">${i.fase_atual || 'N/I'}</div><div class="text-[10px] text-slate-400 uppercase truncate max-w-[200px] font-semibold">${i.objeto_resumido}</div></td>
+                        <td class="p-4">
+                            <div class="font-bold text-slate-100 text-sm">${i.fase_atual || 'N/I'}</div>
+                            <div class="text-[10px] text-slate-400 uppercase truncate max-w-[200px] font-semibold">${i.objeto_resumido}</div>
+                        </td>
                         <td class="p-4 text-center">
                             <span class="aging-badge ${aging.class}">${aging.label}</span>
                             <div class="text-[10px] text-slate-500 mt-1 font-bold">${dtPrevStr}</div>
