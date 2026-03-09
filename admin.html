@@ -84,7 +84,7 @@
                 <input type="hidden" id="editId">
                 <div>
                     <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Descrição / Nome</label>
-                    <input type="text" id="inputNome" required class="input-base">
+                    <textarea id="inputNome" required class="input-base" rows="3"></textarea>
                 </div>
                 <div id="extraFields" class="hidden">
                     <div class="grid grid-cols-2 gap-4">
@@ -97,8 +97,12 @@
                         </div>
                         <div>
                             <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">SLA (Dias Úteis)</label>
-                            <input type="number" id="inputPrazo" class="input-base">
+                            <input type="number" id="inputPrazo" class="input-base" min="0">
                         </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Ordem de Exibição</label>
+                        <input type="number" id="inputOrdem" class="input-base" min="1" placeholder="Ex: 1, 2, 3...">
                     </div>
                 </div>
                 <button type="submit" class="w-full btn-primary py-4">Salvar Alterações</button>
@@ -144,13 +148,26 @@
             const { data } = await sb.from('fluxo_etapas').select('*').order('ordem');
             document.getElementById('listFluxo').innerHTML = data.map(e => `
                 <div class="list-card">
-                    <div>
-                        <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${e.fase}</p>
-                        <p class="font-bold text-sm text-white">${e.descricao}</p>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter">${e.fase}</span>
+                            <span class="text-slate-500 text-[10px] font-bold">Ordem: ${e.ordem}</span>
+                        </div>
+                        <p class="font-bold text-sm text-white leading-tight">${e.descricao}</p>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span class="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded text-[10px] font-black">${e.prazo_dias_uteis}D</span>
-                        <button onclick="editFluxo(${JSON.stringify(e).replace(/'/g, "&apos;")})" class="text-[9px] font-black text-blue-400 uppercase">Editar</button>
+                    <div class="flex items-center gap-4 ml-4">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-indigo-300">${e.prazo_dias_uteis || 0} DU</p>
+                            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Prazo</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick='editFluxo(${JSON.stringify(e).replace(/'/g, "&#39;")})' class="p-2 hover:bg-blue-500/10 rounded-lg transition group">
+                                <svg class="w-4 h-4 text-blue-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button onclick="deleteItem('fluxo_etapas', '${e.id}')" class="p-2 hover:bg-red-500/10 rounded-lg transition group">
+                                <svg class="w-4 h-4 text-red-500 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>`).join('');
         }
@@ -175,6 +192,7 @@
             document.getElementById('inputNome').value = item.descricao;
             document.getElementById('inputFase').value = item.fase;
             document.getElementById('inputPrazo').value = item.prazo_dias_uteis;
+            document.getElementById('inputOrdem').value = item.ordem;
         }
 
         function closeModal() { document.getElementById('modalAdmin').classList.add('hidden'); document.getElementById('adminForm').reset(); }
@@ -190,9 +208,10 @@
                 else await sb.from('equipe').insert([{ nome }]);
             } else {
                 const fase = document.getElementById('inputFase').value;
-                const prazo = document.getElementById('inputPrazo').value;
-                if(id) await sb.from('fluxo_etapas').update({ fase, descricao: nome, prazo_dias_uteis: prazo }).eq('id', id);
-                else await sb.from('fluxo_etapas').insert([{ fase, descricao: nome, prazo_dias_uteis: prazo, ordem: 99 }]);
+                const prazo = parseInt(document.getElementById('inputPrazo').value) || 0;
+                const ordem = parseInt(document.getElementById('inputOrdem').value) || 99;
+                if(id) await sb.from('fluxo_etapas').update({ fase, descricao: nome, prazo_dias_uteis: prazo, ordem }).eq('id', id);
+                else await sb.from('fluxo_etapas').insert([{ fase, descricao: nome, prazo_dias_uteis: prazo, ordem }]);
             }
             closeModal();
             location.reload();
