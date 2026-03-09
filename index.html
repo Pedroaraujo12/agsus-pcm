@@ -140,6 +140,7 @@
                 <div>
                     <label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status (Coluna D)</label>
                     <select id="edit_status" class="form-input">
+                        <option value="">Selecione um status...</option>
                         <option value="Em andamento">Em andamento</option>
                         <option value="Não recebido">Não recebido</option>
                         <option value="Em Instrução">Em Instrução</option>
@@ -266,7 +267,6 @@
             runFilters(); 
         }
 
-        function updateView(data) {
             const ativos = data.filter(i => i.status !== 'Concluído' && i.status !== 'Cancelado');
             const concluidos = data.filter(i => i.status === 'Concluído');
             const cancelados = data.filter(i => i.status === 'Cancelado');
@@ -283,6 +283,7 @@
             
             const table = document.getElementById('mainTable');
             if(table) {
+                // USA O DATA FILTRADO PELOS DROPDOWNS (que já vem como argumento 'data')
                 table.innerHTML = data.map(i => {
                     const aging = getAging(i.data_prevista, i.status);
                     const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
