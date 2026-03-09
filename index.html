@@ -182,6 +182,9 @@
 
         function getAging(dateStr, status) {
             if (status === 'Concluído') return { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' };
+            if (status === 'Cancelado') return { label: 'CANCELADO', class: 'bg-red-900/40 text-red-400' };
+            if (status === 'Devolvido') return { label: 'DEVOLVIDO', class: 'bg-rose-500/20 text-rose-400' };
+            if (status === 'Suspenso') return { label: 'SUSPENSO', class: 'bg-amber-900/40 text-amber-400' };
             if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'N/A', class: 'bg-slate-800 text-slate-500' };
             
             let iso = dateStr;
@@ -264,8 +267,9 @@
         }
 
         function updateView(data) {
-            const ativos = data.filter(i => i.status !== 'Concluído');
+            const ativos = data.filter(i => i.status !== 'Concluído' && i.status !== 'Cancelado');
             const concluidos = data.filter(i => i.status === 'Concluído');
+            const cancelados = data.filter(i => i.status === 'Cancelado');
             
             if(document.getElementById('stat_procs')) document.getElementById('stat_procs').innerText = ativos.length;
             if(document.getElementById('stat_done')) document.getElementById('stat_done').innerText = concluidos.length;
