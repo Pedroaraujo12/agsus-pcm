@@ -116,7 +116,7 @@
 
     <!-- MODAIS -->
     <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
+        <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2rem border border-white/10">
             <div id="modalContent" class="p-8 space-y-4"></div>
             <div class="px-8 py-4 border-t border-white/5 text-right flex gap-2 justify-end">
                 <button id="btnSEI" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl text-[10px] font-bold transition">Abrir SEI</button>
@@ -182,7 +182,7 @@
 
         function getAging(dateStr, status) {
             if (status === 'Concluído') return { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' };
-            if (!dateStr || dateStr === 'None') return { label: 'N/A', class: 'bg-slate-800 text-slate-500' };
+            if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'N/A', class: 'bg-slate-800 text-slate-500' };
             
             let iso = dateStr;
             if (dateStr.includes('/')) {
@@ -264,8 +264,8 @@
         }
 
         function updateView(data) {
-            const ativos = data.filter(i => i.fase_atual !== 'Concluído');
-            const concluidos = data.filter(i => i.fase_atual === 'Concluído');
+            const ativos = data.filter(i => i.status !== 'Concluído');
+            const concluidos = data.filter(i => i.status === 'Concluído');
             
             if(document.getElementById('stat_procs')) document.getElementById('stat_procs').innerText = ativos.length;
             if(document.getElementById('stat_done')) document.getElementById('stat_done').innerText = concluidos.length;
@@ -275,7 +275,7 @@
             const hom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
             if(document.getElementById('stat_val')) document.getElementById('stat_val').innerText = formatBRL(est);
             if(document.getElementById('stat_save')) document.getElementById('stat_save').innerText = formatBRL(est - hom);
-            if(document.getElementById('stat_delay')) document.getElementById('stat_delay').innerText = ativos.filter(i => getAging(i.data_prevista, i.fase_atual).label.includes('Atrasado')).length;
+            if(document.getElementById('stat_delay')) document.getElementById('stat_delay').innerText = ativos.filter(i => getAging(i.data_prevista, i.status).label.includes('Atrasado')).length;
             
             const table = document.getElementById('mainTable');
             if(table) {
@@ -283,8 +283,8 @@
                     const aging = getAging(i.data_prevista, i.status);
                     const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
                     
-                    const dtPrevStr = i.data_prevista ? new Date(i.data_prevista + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
-                    const dtFinalStr = i.data_entrega_final ? new Date(i.data_entrega_final + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+                    const dtPrevStr = (i.data_prevista && i.data_prevista !== 'None' && i.data_prevista !== '') ? new Date(i.data_prevista + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+                    const dtFinalStr = (i.data_entrega_final && i.data_entrega_final !== 'None' && i.data_entrega_final !== '') ? new Date(i.data_entrega_final + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
 
                     return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
                         <td class="p-4 font-black text-blue-400">${processIdHtml}</td>
@@ -323,7 +323,7 @@
             const cStatus = document.getElementById('chartStatus');
             if (cStatus) {
                 const s = { ok: 0, alert: 0, late: 0 };
-                ativos.forEach(i => { const l = getAging(i.data_prevista, i.fase_atual).label; if(l.includes('OK')) s.ok++; else if(l.includes('Vence')) s.alert++; else if(l.includes('Atrasado')) s.late++; });
+                ativos.forEach(i => { const l = getAging(i.data_prevista, i.status).label; if(l.includes('OK')) s.ok++; else if(l.includes('Vence')) s.alert++; else if(l.includes('Atrasado')) s.late++; });
                 charts.stat = new Chart(cStatus, { type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('status', ['No Prazo', 'Alerta', 'Atrasado'][activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } } });
             }
         }
