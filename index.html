@@ -181,30 +181,74 @@
         function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
         function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
 
-        function getAging(dateStr, status) {
-            if (status === 'Concluído') return { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' };
-            if (status === 'Cancelado') return { label: 'CANCELADO', class: 'bg-red-900/40 text-red-400' };
-            if (status === 'Devolvido') return { label: 'DEVOLVIDO', class: 'bg-rose-500/20 text-rose-400' };
-            if (status === 'Suspenso') return { label: 'SUSPENSO', class: 'bg-amber-900/40 text-amber-400' };
-            if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'N/A', class: 'bg-slate-800 text-slate-500' };
-            
-            let iso = dateStr;
-            if (dateStr.includes('/')) {
-                const p = dateStr.split('/');
-                iso = `${p[2]}-${p[1]}-${p[0]}`;
-            }
-            
-            const target = new Date(iso.split('T')[0] + 'T12:00:00');
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            
-            const targetTime = target.getTime();
-            const todayTime = today.getTime();
-            const diff = Math.ceil((targetTime - todayTime) / 86400000);
+        // LÓGICA DE ESPECIALISTA EM TI: Cálculo de Dias Úteis Reais (Business Days)
+        function isHoliday(date) {
+            const holidays = [
+                '2026-01-01', // Ano Novo
+                '2026-02-16', '2026-02-17', // Carnaval
+                '2026-04-03', // Sexta-feira Santa
+                '2026-04-21', // Tiradentes
+                '2026-05-01', // Dia do Trabalho
+                '2026-06-04', // Corpus Christi
+                '2026-09-07', // Independência
+                '2026-10-12', // Aparecida
+                '2026-11-02', // Finados
+                '2026-11-15', // Proclamação
+                '2026-11-20', // Consciência Negra
+                '2026-12-25'  // Natal
+            ];
+            const s = date.toISOString().split('T')[0];
+            return holidays.includes(s);
+        }
 
-            if (diff < 0) return { label: `Atrasado ${Math.abs(diff)}d`, class: 'bg-red-500/10 text-red-500' };
-            if (diff <= 2) return { label: `Vence ${diff}d`, class: 'bg-amber-500/10 text-amber-500' };
-            return { label: `SLA OK`, class: 'bg-emerald-500/10 text-emerald-500' };
+        function getBusinessDaysDiff(startDate, endDate) {
+            let count = 0;
+            let curDate = new Date(startDate.getTime());
+            const isNegative = endDate < startDate;
+            
+            if (isNegative) {
+                while (curDate > endDate) {
+                    curDate.setDate(curDate.getDate() - 1);
+                    const day = curDate.getDay();
+                    if (day !== 0 && day !== 6 && !isHoliday(curDate)) count--;
+                }
+            } else {
+                while (curDate < endDate) {
+                    curDate.setDate(curDate.getDate() + 1);
+                    const day = curDate.getDay();
+                    if (day !== 0 && day !== 6 && !isHoliday(curDate)) count++;
+                }
+            }
+            return count;
+        }
+
+        function getAging(dateStr, status) {
+            const statusConfig = {
+                'Concluído': { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' },
+                'Cancelado': { label: 'CANCELADO', class: 'bg-red-900/40 text-red-400' },
+                'Devolvido': { label: 'DEVOLVIDO', class: 'bg-rose-500/20 text-rose-400' },
+                'Suspenso': { label: 'SUSPENSO', class: 'bg-amber-900/40 text-amber-400' }
+            };
+
+            if (statusConfig[status]) return statusConfig[status];
+            if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'S/ PRAZO', class: 'bg-slate-800 text-slate-500' };
+            
+            try {
+                const parts = dateStr.includes('/') ? dateStr.split('/') : dateStr.split('-');
+                const target = dateStr.includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(parts[0], parts[1]-1, parts[2]);
+                target.setHours(12, 0, 0, 0);
+
+                const today = new Date();
+                today.setHours(12, 0, 0, 0);
+                
+                const diffDays = getBusinessDaysDiff(today, target);
+
+                if (diffDays < 0) return { label: `Atrasado ${Math.abs(diffDays)} DU`, class: 'bg-red-500/20 text-red-500 border border-red-500/50' };
+                if (diffDays <= 2) return { label: `Vence ${diffDays} DU`, class: 'bg-amber-500/20 text-amber-500 border border-amber-500/50' };
+                return { label: `SLA OK (${diffDays} DU)`, class: 'bg-emerald-500/20 text-emerald-500' };
+            } catch (e) {
+                return { label: 'ERRO DATA', class: 'bg-red-900 text-white' };
+            }
         }
 
         async function init() {
@@ -288,8 +332,17 @@
                     const aging = getAging(i.data_prevista, i.status);
                     const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
                     
-                    const dtPrevStr = (i.data_prevista && i.data_prevista !== 'None' && i.data_prevista !== '') ? new Date(i.data_prevista + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
-                    const dtFinalStr = (i.data_entrega_final && i.data_entrega_final !== 'None' && i.data_entrega_final !== '') ? new Date(i.data_entrega_final + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+                    // TI MASTER FIX: Normalização de exibição de data DD/MM/AAAA
+                    const formatDateTI = (d) => {
+                        if (!d || d === 'None' || d === '') return '-';
+                        const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
+                        if (parts.length !== 3) return '-';
+                        // Assume YYYY-MM-DD do banco
+                        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    };
+
+                    const dtPrevStr = formatDateTI(i.data_prevista);
+                    const dtFinalStr = formatDateTI(i.data_entrega_final);
 
                     return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
                         <td class="p-4 font-black text-blue-400">${processIdHtml}</td>
