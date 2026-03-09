@@ -181,42 +181,36 @@
         function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
         function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
 
-        // LÓGICA DE ESPECIALISTA EM TI: Cálculo de Dias Úteis Reais (Business Days)
+        // LÓGICA DE TI SENIOR: Cálculo de Dias Úteis Reais (Business Days Engine v2.0)
         function isHoliday(date) {
             const holidays = [
-                '2026-01-01', // Ano Novo
-                '2026-02-16', '2026-02-17', // Carnaval
-                '2026-04-03', // Sexta-feira Santa
-                '2026-04-21', // Tiradentes
-                '2026-05-01', // Dia do Trabalho
-                '2026-06-04', // Corpus Christi
-                '2026-09-07', // Independência
-                '2026-10-12', // Aparecida
-                '2026-11-02', // Finados
-                '2026-11-15', // Proclamação
-                '2026-11-20', // Consciência Negra
-                '2026-12-25'  // Natal
+                '2026-01-01', '2026-02-16', '2026-02-17', '2026-04-03', '2026-04-21',
+                '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12', '2026-11-02',
+                '2026-11-15', '2026-11-20', '2026-12-25'
             ];
-            const s = date.toISOString().split('T')[0];
+            // Fix timezone shift for string comparison
+            const s = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
             return holidays.includes(s);
         }
 
         function getBusinessDaysDiff(startDate, endDate) {
             let count = 0;
             let curDate = new Date(startDate.getTime());
-            const isNegative = endDate < startDate;
+            curDate.setHours(12, 0, 0, 0);
+            const targetDate = new Date(endDate.getTime());
+            targetDate.setHours(12, 0, 0, 0);
+            
+            const isNegative = targetDate < curDate;
             
             if (isNegative) {
-                while (curDate > endDate) {
+                while (curDate > targetDate) {
                     curDate.setDate(curDate.getDate() - 1);
-                    const day = curDate.getDay();
-                    if (day !== 0 && day !== 6 && !isHoliday(curDate)) count--;
+                    if (curDate.getDay() !== 0 && curDate.getDay() !== 6 && !isHoliday(curDate)) count--;
                 }
             } else {
-                while (curDate < endDate) {
+                while (curDate < targetDate) {
                     curDate.setDate(curDate.getDate() + 1);
-                    const day = curDate.getDay();
-                    if (day !== 0 && day !== 6 && !isHoliday(curDate)) count++;
+                    if (curDate.getDay() !== 0 && curDate.getDay() !== 6 && !isHoliday(curDate)) count++;
                 }
             }
             return count;
@@ -234,9 +228,15 @@
             if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'S/ PRAZO', class: 'bg-slate-800 text-slate-500' };
             
             try {
-                const parts = dateStr.includes('/') ? dateStr.split('/') : dateStr.split('-');
-                const target = dateStr.includes('/') ? new Date(parts[2], parts[1]-1, parts[0]) : new Date(parts[0], parts[1]-1, parts[2]);
-                target.setHours(12, 0, 0, 0);
+                // TI MASTER FIX: Parsing robusto independente de formato ISO ou BR
+                let target;
+                if (dateStr.includes('/')) {
+                    const [d, m, y] = dateStr.split('/');
+                    target = new Date(y, m - 1, d, 12, 0, 0);
+                } else {
+                    const [y, m, d] = dateStr.split('T')[0].split('-');
+                    target = new Date(y, m - 1, d, 12, 0, 0);
+                }
 
                 const today = new Date();
                 today.setHours(12, 0, 0, 0);
@@ -247,6 +247,7 @@
                 if (diffDays <= 2) return { label: `Vence ${diffDays} DU`, class: 'bg-amber-500/20 text-amber-500 border border-amber-500/50' };
                 return { label: `SLA OK (${diffDays} DU)`, class: 'bg-emerald-500/20 text-emerald-500' };
             } catch (e) {
+                console.error("Erro no processamento de aging:", e);
                 return { label: 'ERRO DATA', class: 'bg-red-900 text-white' };
             }
         }
