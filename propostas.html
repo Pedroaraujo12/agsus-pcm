@@ -8,59 +8,156 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-        @media (min-width: 1024px) { body { flex-direction: row; overflow: hidden; } }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; overflow-x: auto; }
-        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; overflow-x: hidden; } }
-        .nav-item { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748b; transition: all 0.3s; cursor: pointer; flex-shrink: 0; }
-        @media (min-width: 1024px) { .nav-item { margin-bottom: 16px; width: 44px; height: 44px; } }
-        .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        .nav-item::after { content: attr(data-title); position: absolute; left: 60px; background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 200; }
-        @media (min-width: 1024px) { .nav-item:hover::after { opacity: 1; left: 70px; } }
+        :root { 
+            --bg-deep: #000000;
+            --glass: rgba(18, 18, 18, 0.7); 
+            --accent: #3b82f6; 
+            --glow: rgba(59, 130, 246, 0.3);
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #000000 50%),
+                        radial-gradient(circle at 100% 100%, #1e1b4b 0%, #000000 50%);
+            color: #f8fafc; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
+        }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
+        
+        .glass-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 1.5rem; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        
+        .sidebar { 
+            width: 100%; 
+            height: auto; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            z-index: 100; 
+            justify-content: space-around; 
+            flex-shrink: 0; 
+            background: rgba(0, 0, 0, 0.9); 
+        }
+        @media (min-width: 1024px) { 
+            .sidebar { 
+                width: 80px; 
+                height: 100vh; 
+                flex-direction: column; 
+                border-right: 1px solid rgba(255,255,255,0.05); 
+                border-bottom: none; 
+                padding: 24px 0; 
+                justify-content: flex-start; 
+                position: sticky; 
+                top: 0; 
+            } 
+        }
+        
+        .nav-item { 
+            position: relative; 
+            width: 48px; 
+            height: 48px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 14px; 
+            margin-bottom: 12px; 
+            color: #64748b; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+        }
+        .nav-item:hover, .nav-item.active { 
+            color: #ffffff; 
+            background: var(--accent); 
+            box-shadow: 0 0 20px var(--glow); 
+            transform: scale(1.05); 
+        }
+        @media (min-width: 1024px) {
+            .nav-item .tooltip { 
+                visibility: hidden; 
+                position: absolute; 
+                background: #111; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 8px; 
+                font-size: 11px; 
+                font-weight: 800; 
+                text-transform: uppercase; 
+                white-space: nowrap; 
+                border: 1px solid rgba(255,255,255,0.1); 
+                z-index: 1000; 
+                opacity: 0; 
+                transition: 0.2s; 
+                pointer-events: none; 
+                left: 140%; 
+                top: 50%; 
+                transform: translateY(-50%); 
+            }
+            .nav-item:hover .tooltip { visibility: visible; opacity: 1; }
+        }
+        
         .main-container { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
-        @media (min-width: 1024px) { .main-container { padding: 32px; height: 100vh; } }
-        .status-badge { font-size: 10px; padding: 6px 14px; border-radius: 20px; font-weight: 800; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        @media (min-width: 1024px) { .main-container { padding: 32px; } }
+        
+        .status-badge { font-size: 10px; padding: 6px 14px; border-radius: 20px; font-weight: 800; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
         .vencedora { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
         .desclassificada { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
-        .action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; transition: 0.2s; }
-        .action-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
-        .action-btn.delete:hover { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
-        .action-btn.winner:hover { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-        .form-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; font-size: 12px; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        .action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.05); color: #f8fafc; transition: 0.2s; }
+        .action-btn:hover { background: rgba(255,255,255,0.05); transform: scale(1.05); }
+        .action-btn.delete:hover { color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
+        .action-btn.winner:hover { color: #10b981; border-color: rgba(16, 185, 129, 0.2); }
+        
+        .form-input { 
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 12px; 
+            padding: 12px; 
+            color: white; 
+            outline: none; 
+            width: 100%; 
+            font-size: 13px; 
+            transition: 0.2s; 
+        }
+        .form-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     </style>
 </head>
 <body class="flex">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar glass-card">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-110">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
+    <aside class="sidebar">
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
     </aside>
 
     <main class="main-container">
         <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
                 <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">Julgamento & Seleção</p>
-                <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight leading-none">Módulo de <br class="md:hidden"> Propostas</h1>
+                <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Módulo de Propostas</h1>
             </div>
-            <div class="flex gap-3 w-full md:w-auto">
-                <button onclick="document.getElementById('modalLance').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg> Registrar Proposta
-                </button>
-            </div>
+            <button onclick="document.getElementById('modalLance').classList.remove('hidden')" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg> Registrar Proposta
+            </button>
         </header>
 
-        <div class="glass-card rounded-[2.5rem] overflow-hidden shadow-2xl">
+        <div class="glass-card rounded-[2rem] overflow-hidden shadow-2xl">
             <div class="p-8 border-b border-white/5 bg-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div class="flex flex-col gap-1 w-full sm:w-auto">
-                    <select id="selectProcesso" class="bg-slate-800/50 border border-white/10 rounded-xl px-4 py-2 text-sm font-black uppercase text-slate-100 outline-none cursor-pointer hover:border-blue-500 transition w-full sm:w-64">
+                    <select id="selectProcesso" class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-black uppercase text-slate-100 outline-none cursor-pointer hover:border-blue-500 transition w-full sm:w-64">
                         <option value="">Selecione um Processo...</option>
                     </select>
                     <span id="totalLabel" class="text-[10px] font-bold text-slate-500 tracking-widest mt-2 px-1">TOTAL DE PROPOSTAS: 0</span>
@@ -78,7 +175,7 @@
                     <thead>
                         <tr class="text-[10px] font-bold uppercase text-slate-500 tracking-widest">
                             <th class="px-6 py-4">Fornecedor / Valor</th>
-                            <th class="px-6 py-4">Envio</th>
+                            <th class="px-6 py-4 text-center">Envio</th>
                             <th class="px-6 py-4 text-center">Status</th>
                             <th class="px-6 py-4 text-center">Ações</th>
                         </tr>
@@ -92,30 +189,30 @@
     </main>
 
     <!-- MODAL REGISTRAR LANCE -->
-    <div id="modalLance" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
+    <div id="modalLance" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Novo Registro de Lance</h2><button onclick="document.getElementById('modalLance').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
-            <form id="lanceForm" class="p-8 space-y-6">
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Processo</label><select id="l_proc" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Fornecedor</label><select id="l_forn" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Valor (R$)</label><input type="number" id="l_val" step="0.01" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white" placeholder="0.00"></div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Proposta no Banco</button>
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest text-white">Novo Registro de Lance</h2><button onclick="document.getElementById('modalLance').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
+            <form id="lanceForm" class="p-8 space-y-4">
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Processo</label><select id="l_proc" class="form-input"></select></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fornecedor</label><select id="l_forn" class="form-input"></select></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor (R$)</label><input type="number" id="l_val" step="0.01" required class="form-input" placeholder="0.00"></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition mt-4">Salvar Proposta</button>
             </form>
         </div>
     </div>
 
     <!-- MODAL EDITAR LANCE -->
-    <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
+    <div id="modalEdit" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest">Editar Registro de Lance</h2><button onclick="document.getElementById('modalEdit').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
-            <form id="editForm" class="p-8 space-y-6">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest text-white">Editar Registro de Lance</h2><button onclick="document.getElementById('modalEdit').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
+            <form id="editForm" class="p-8 space-y-4">
                 <input type="hidden" id="edit_id">
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Fornecedor</label><input type="text" id="edit_forn" readonly class="form-input opacity-50"></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Valor (R$)</label><input type="number" id="edit_val" step="0.01" required class="form-input"></div>
-                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2 tracking-widest">Status de Julgamento</label><select id="edit_stat" class="form-input"><option value="Recebida">Recebida</option><option value="Em Análise">Em Análise</option><option value="Vencedora">Vencedora</option><option value="Desclassificada">Desclassificada</option></select></div>
-                <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest transition border border-white/5">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Fornecedor</label><input type="text" id="edit_forn" readonly class="form-input opacity-50"></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor (R$)</label><input type="number" id="edit_val" step="0.01" required class="form-input"></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status de Julgamento</label><select id="edit_stat" class="form-input"><option value="Recebida">Recebida</option><option value="Em Análise">Em Análise</option><option value="Vencedora">Vencedora</option><option value="Desclassificada">Desclassificada</option></select></div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')" class="flex-1 bg-slate-900 hover:bg-slate-800 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest transition border border-white/5 text-white">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition text-white">Salvar</button>
                 </div>
             </form>
         </div>
@@ -128,18 +225,18 @@
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
-            { title: 'Novo Processo', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
             { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
-            { title: 'Fornecedores', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
             { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
-            { title: 'Avaliação', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
-            { title: 'Contratos', icon: '<path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>', link: 'contratos.html' },
-            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>', link: 'pagamentos.html' },
-            { title: 'Relatórios', icon: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path><path d="M14 4v4h4"></path>', link: 'relatorios.html' }
+            { title: 'Contratos', icon: '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', link: 'contratos.html' },
+            { title: 'Almoxarifado', icon: '<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14v4m0 0l8 4m-8-4l-8 4m8 4l8-4m-8 4V11"/>', link: 'fornecedores.html' },
+            { title: 'Inventário', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>', link: 'avaliacao.html' },
+            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'pagamentos.html' },
+            { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
 
         async function init() {
-            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='propostas.html'?'active':''}" data-title="${m.title}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg></div>`).join('');
+            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='propostas.html'?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
             
             const { data: ps } = await sb.from('licitacoes').select('id_processo');
             const { data: fs } = await sb.from('fornecedores').select('id, razao_social');
@@ -148,11 +245,11 @@
             const lProc = document.getElementById('l_proc');
             const lForn = document.getElementById('l_forn');
             
-            ps.forEach(p => { 
+            if(ps) ps.forEach(p => { 
                 selP.add(new Option(p.id_processo, p.id_processo)); 
                 lProc.add(new Option(p.id_processo, p.id_processo)); 
             });
-            fs.forEach(f => lForn.add(new Option(f.razao_social, f.id)));
+            if(fs) fs.forEach(f => lForn.add(new Option(f.razao_social, f.id)));
             
             selP.onchange = (e) => loadData(e.target.value);
         }
@@ -167,9 +264,9 @@
 
             const { data } = await sb.from('propostas').select('*, fornecedores(razao_social)').eq('processo_id', pid).order('valor_proposta');
             
-            document.getElementById('totalLabel').innerText = `TOTAL DE PROPOSTAS: ${data.length}`;
+            document.getElementById('totalLabel').innerText = `TOTAL DE PROPOSTAS: ${data ? data.length : 0}`;
             
-            if(data.length > 0) {
+            if(data && data.length > 0) {
                 const minVal = Math.min(...data.map(p => p.valor_proposta));
                 document.getElementById('minPrice').innerText = minVal.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
                 document.getElementById('statsProcesso').classList.remove('hidden');
@@ -177,25 +274,25 @@
                 document.getElementById('statsProcesso').classList.add('hidden');
             }
 
-            document.getElementById('propostaTable').innerHTML = data.length ? data.map(p => {
+            document.getElementById('propostaTable').innerHTML = (data && data.length) ? data.map(p => {
                 let statusClass = '';
                 if(p.status_julgamento === 'Vencedora') statusClass = 'vencedora';
                 if(p.status_julgamento === 'Desclassificada') statusClass = 'desclassificada';
 
                 return `
-                <tr class="hover:bg-white/5 transition">
+                <tr class="row-hover transition">
                     <td class="px-6 py-6">
                         <div class="font-black text-slate-100 text-[12px] uppercase tracking-tight">${p.fornecedores?.razao_social || 'N/I'}</div>
                         <div class="font-black text-slate-400 text-[10px] mt-1 tracking-widest">R$ ${parseFloat(p.valor_proposta||0).toLocaleString('pt-br')}</div>
                     </td>
-                    <td class="px-6 py-6 text-slate-400 font-bold">${p.data_lance ? new Date(p.data_lance).toLocaleDateString('pt-br') : '--/--/--'}</td>
+                    <td class="px-6 py-6 text-slate-400 font-bold text-center">${p.data_lance ? new Date(p.data_lance).toLocaleDateString('pt-br') : '--/--/--'}</td>
                     <td class="px-6 py-6 text-center">
                         <span class="status-badge ${statusClass}">${p.status_julgamento || 'Recebida'}</span>
                     </td>
                     <td class="px-6 py-6">
                         <div class="flex justify-center gap-2">
                             <button onclick='quickWinner("${p.id}")' class="action-btn winner" title="Marcar como Vencedora"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></button>
-                            <button onclick='openEdit(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="action-btn" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                            <button onclick='openEdit(${JSON.stringify(p).replace(/'/g, "&#39;")})' class="action-btn" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
                             <button onclick="deleteLance('${p.id}')" class="action-btn delete" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                         </div>
                     </td>

@@ -8,72 +8,179 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; overflow-x: hidden; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { transition: all 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 12px; margin-bottom: 12px; color: #94a3b8; }
-        .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-        .main-content { height: 100vh; overflow-y: auto; }
-        .step-node { display: flex; align-items: center; gap: 8px; font-size: 8px; font-weight: 800; text-transform: uppercase; color: #475569; }
+        :root { 
+            --bg-deep: #000000;
+            --glass: rgba(18, 18, 18, 0.7); 
+            --accent: #3b82f6; 
+            --glow: rgba(59, 130, 246, 0.3);
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #000000 50%),
+                        radial-gradient(circle at 100% 100%, #1e1b4b 0%, #000000 50%);
+            color: #f8fafc; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
+        }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
+        
+        .glass-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 1.5rem; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        
+        .sidebar { 
+            width: 100%; 
+            height: auto; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            z-index: 100; 
+            justify-content: space-around; 
+            flex-shrink: 0; 
+            background: rgba(0, 0, 0, 0.9); 
+        }
+        @media (min-width: 1024px) { 
+            .sidebar { 
+                width: 80px; 
+                height: 100vh; 
+                flex-direction: column; 
+                border-right: 1px solid rgba(255,255,255,0.05); 
+                border-bottom: none; 
+                padding: 24px 0; 
+                justify-content: flex-start; 
+                position: sticky; 
+                top: 0; 
+            } 
+        }
+        
+        .nav-item { 
+            position: relative; 
+            width: 48px; 
+            height: 48px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 14px; 
+            margin-bottom: 12px; 
+            color: #64748b; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+        }
+        .nav-item:hover, .nav-item.active { 
+            color: #ffffff; 
+            background: var(--accent); 
+            box-shadow: 0 0 20px var(--glow); 
+            transform: scale(1.05); 
+        }
+        @media (min-width: 1024px) {
+            .nav-item .tooltip { 
+                visibility: hidden; 
+                position: absolute; 
+                background: #111; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 8px; 
+                font-size: 11px; 
+                font-weight: 800; 
+                text-transform: uppercase; 
+                white-space: nowrap; 
+                border: 1px solid rgba(255,255,255,0.1); 
+                z-index: 1000; 
+                opacity: 0; 
+                transition: 0.2s; 
+                pointer-events: none; 
+                left: 140%; 
+                top: 50%; 
+                transform: translateY(-50%); 
+            }
+            .nav-item:hover .tooltip { visibility: visible; opacity: 1; }
+        }
+        
+        .main-content { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
+        @media (min-width: 1024px) { .main-content { padding: 32px; } }
+        
+        .step-node { display: flex; align-items: center; gap: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #475569; }
         .step-complete { color: #10b981; }
         .step-active { color: #3b82f6; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        .form-input { 
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 12px; 
+            padding: 12px; 
+            color: white; 
+            outline: none; 
+            width: 100%; 
+            font-size: 13px; 
+            transition: 0.2s; 
+        }
+        .form-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     </style>
 </head>
 <body class="flex">
 
-    <!-- BARRA LATERAL -->
-    <aside class="w-20 h-screen glass-card border-r border-white/5 flex flex-col items-center py-8 z-50">
-        <div class="mb-10 text-blue-500"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-        <nav class="flex flex-col flex-1">
-            <div class="nav-item" onclick="location.href='index.html'" title="Dashboard"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
-            <div class="nav-item" onclick="location.href='editais.html'" title="Editais"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-            <div class="nav-item" onclick="location.href='fornecedores.html'" title="Fornecedores"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
-            <div class="nav-item active" onclick="location.href='pagamentos.html'" title="Pagamentos"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path></svg></div>
-        </nav>
+    <aside class="sidebar">
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
     </aside>
 
-    <main class="flex-1 main-content p-8">
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
+    <main class="main-content">
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-                <p class="text-xs font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo Financeiro</p>
-                <h1 class="text-3xl font-extrabold tracking-tight uppercase">Liquidação & NF-e</h1>
+                <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo Financeiro</p>
+                <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Liquidação & NF-e</h1>
             </div>
-            <button onclick="document.getElementById('modalNF').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase shadow-lg">+ Registrar Nota Fiscal</button>
+            <button onclick="document.getElementById('modalNF').classList.remove('hidden')" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">
+                + Registrar Nota Fiscal
+            </button>
         </header>
 
-        <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
-            <div class="p-8 border-b border-white/5 bg-white/5">
-                <h2 class="text-xs font-black uppercase text-slate-100 tracking-widest">Fila de Pagamentos do Banco</h2>
+        <div class="glass-card rounded-[2rem] overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                <h2 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Fila de Pagamentos</h2>
+                <span id="rowCount" class="text-[9px] font-bold bg-black/40 px-3 py-1 rounded-full text-slate-500">-- registros</span>
             </div>
-            <div class="overflow-x-hidden">
-                <table class="w-full text-left table-fixed">
+            <div class="overflow-x-auto p-4">
+                <table class="w-full text-left min-w-[800px]">
                     <thead>
-                        <tr class="text-[9px] font-black uppercase text-slate-500 border-b border-white/10 bg-slate-900/50">
-                            <th class="w-[20%] px-8 py-5">NF / Contrato</th>
-                            <th class="w-[40%] px-8 py-5">Pipeline de Aprovação</th>
-                            <th class="w-[20%] px-8 py-5 text-right">Valor Líquido</th>
-                            <th class="w-[20%] px-8 py-5 text-right">Ação</th>
+                        <tr class="text-[10px] font-bold uppercase text-slate-500 tracking-widest">
+                            <th class="px-6 py-4">NF / Contrato</th>
+                            <th class="px-6 py-4 text-center">Pipeline de Aprovação</th>
+                            <th class="px-6 py-4 text-right">Valor Líquido</th>
+                            <th class="px-6 py-4 text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="pagamentoTable" class="text-[10px] divide-y divide-white/5"></tbody>
+                    <tbody id="pagamentoTable" class="text-[11px] divide-y divide-white/5"></tbody>
                 </table>
             </div>
         </div>
     </main>
 
     <!-- Modal Nova NF -->
-    <div id="modalNF" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[100] flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
-            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center"><h2 class="text-lg font-black uppercase text-white">Registrar Nota Fiscal</h2><button onclick="document.getElementById('modalNF').classList.add('hidden')" class="text-white opacity-50">&times;</button></div>
-            <form id="nfForm" class="p-8 space-y-6">
-                <div><label class="text-[9px] font-black text-slate-500 uppercase">Contrato Vinculado</label><select id="nf_ct" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></select></div>
+    <div id="modalNF" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden z-[200] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest text-white">Registrar Nota Fiscal</h2><button onclick="document.getElementById('modalNF').classList.add('hidden')" class="text-2xl opacity-50">&times;</button></div>
+            <form id="nfForm" class="p-8 space-y-4">
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Contrato Vinculado</label><select id="nf_ct" class="form-input"></select></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase">Número da NF</label><input type="text" id="nf_num" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></div>
-                    <div><label class="text-[9px] font-black text-slate-500 uppercase">Valor Líquido</label><input type="number" step="0.01" id="nf_valor" required class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Número da NF</label><input type="text" id="nf_num" required class="form-input"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Líquido</label><input type="number" step="0.01" id="nf_valor" required class="form-input"></div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl uppercase text-xs tracking-widest">Protocolar NF no Banco</button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl uppercase text-xs tracking-widest transition mt-4">Protocolar NF</button>
             </form>
         </div>
     </div>
@@ -83,31 +190,49 @@
         const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const menuItems = [
+            { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
+            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
+            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
+            { title: 'Contratos', icon: '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', link: 'contratos.html' },
+            { title: 'Almoxarifado', icon: '<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14v4m0 0l8 4m-8-4l-8 4m8 4l8-4m-8 4V11"/>', link: 'fornecedores.html' },
+            { title: 'Inventário', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>', link: 'avaliacao.html' },
+            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'pagamentos.html' },
+            { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
+        ];
+
         async function init() {
+            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='pagamentos.html'?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
+            
             const { data: cts } = await sb.from('contratos').select('id, numero_contrato');
             const selCT = document.getElementById('nf_ct');
-            cts.forEach(c => selCT.add(new Option(c.numero_contrato, c.id)));
+            if(cts) cts.forEach(c => selCT.add(new Option(c.numero_contrato, c.id)));
             loadPagamentos();
         }
 
         async function loadPagamentos() {
             const { data } = await sb.from('pagamentos').select('*, contratos(numero_contrato, fornecedores(razao_social))').order('created_at', {ascending: false});
             const table = document.getElementById('pagamentoTable');
+            if(!data) return;
+            document.getElementById('rowCount').innerText = data.length + " REGISTROS";
             table.innerHTML = data.map(p => {
                 const status = p.status_liquidacao;
                 return `
-                <tr class="hover:bg-white/5 transition">
-                    <td class="px-8 py-6"><div class="font-black text-slate-100">NF ${p.numero_nota_fiscal}</div><div class="text-[8px] text-blue-400 font-bold uppercase">${p.contratos.fornecedores.razao_social}</div></td>
+                <tr class="row-hover transition">
+                    <td class="px-8 py-6"><div class="font-black text-slate-100 text-sm">NF ${p.numero_nota_fiscal}</div><div class="text-[9px] text-blue-400 font-bold uppercase truncate max-w-[200px]">${p.contratos?.fornecedores?.razao_social || 'N/I'}</div></td>
                     <td class="px-8 py-6">
-                        <div class="flex gap-3">
+                        <div class="flex justify-center gap-4">
                             <div class="step-node ${['Entrada','Ateste','Liquidado','Pago'].includes(status)?'step-complete':''}">● Entrada</div>
                             <div class="step-node ${['Ateste','Liquidado','Pago'].includes(status)?'step-complete':status==='Ateste'?'step-active':''}">● Ateste</div>
                             <div class="step-node ${['Liquidado','Pago'].includes(status)?'step-complete':status==='Liquidado'?'step-active':''}">● Liquidado</div>
                             <div class="step-node ${status==='Pago'?'step-complete':''}">● Pago</div>
                         </div>
                     </td>
-                    <td class="px-8 py-6 text-right font-black text-slate-100">R$ ${parseFloat(p.valor_liquido).toLocaleString('pt-br')}</td>
-                    <td class="px-8 py-6 text-right"><button onclick="avancar('${p.id}', '${status}')" class="bg-blue-600/10 text-blue-400 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Avançar Status</button></td>
+                    <td class="px-8 py-6 text-right font-black text-slate-100 text-sm">R$ ${parseFloat(p.valor_liquido).toLocaleString('pt-br')}</td>
+                    <td class="px-8 py-6 text-center">
+                        <button onclick="avancar('${p.id}', '${status}')" class="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/20 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition">Avançar</button>
+                    </td>
                 </tr>`;
             }).join('');
         }
@@ -116,17 +241,20 @@
             const fluxo = ['Entrada', 'Ateste', 'Liquidado', 'Pago'];
             const proximo = fluxo[fluxo.indexOf(atual) + 1] || atual;
             await sb.from('pagamentos').update({ status_liquidacao: proximo }).eq('id', id);
-            location.reload();
+            loadPagamentos();
         }
 
         document.getElementById('nfForm').addEventListener('submit', async e => {
             e.preventDefault();
-            await sb.from('pagamentos').insert([{
+            const { error } = await sb.from('pagamentos').insert([{
                 contrato_id: document.getElementById('nf_ct').value,
                 numero_nota_fiscal: document.getElementById('nf_num').value,
                 valor_liquido: document.getElementById('nf_valor').value
             }]);
-            location.reload();
+            if(!error) {
+                document.getElementById('modalNF').classList.add('hidden');
+                loadPagamentos();
+            }
         });
 
         init();
