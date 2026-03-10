@@ -470,7 +470,6 @@
                         if (!d || d === 'None' || d === '') return '-';
                         const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
                         if (parts.length !== 3) return '-';
-                        // Assume YYYY-MM-DD do banco
                         return `${parts[2]}/${parts[1]}/${parts[0]}`;
                     };
 
@@ -518,7 +517,7 @@
             if (cStatus) {
                 const s = { ok: 0, alert: 0, late: 0 };
                 ativos.forEach(i => { const l = getAging(i.data_prevista, i.status).label; if(l.includes('OK')) s.ok++; else if(l.includes('Vence')) s.alert++; else if(l.includes('Atrasado')) s.late++; });
-                charts.stat = new Chart(cStatus, { type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('status', ['No Prazo', 'Alerta', 'Atrasado'][activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } } });
+                charts.stat = new Chart(cStatus, { type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('prazo', ['No Prazo', 'Alerta', 'Atrasados'][activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } } });
             }
         }
 
