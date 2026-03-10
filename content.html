@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgSUS | Content Pipeline Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-deep: #000000;
+            --glass: rgba(18, 18, 18, 0.7); 
+            --accent: #3b82f6; 
+            --glow: rgba(59, 130, 246, 0.3);
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #000000 50%),
+                        radial-gradient(circle at 100% 100%, #1e1b4b 0%, #000000 50%);
+            color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; 
+        }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
+        .glass-card { 
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 1.5rem; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        .kanban-column { min-width: 320px; max-width: 320px; height: calc(100vh - 180px); overflow-y: auto; }
+        .content-card { cursor: grab; transition: 0.2s; }
+        .content-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+        .form-input { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; font-size: 13px; }
+        .form-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        .sidebar { background: rgba(0, 0, 0, 0.95); position: sticky; top: 0; z-index: 1000; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar w-full lg:w-20 h-16 lg:h-screen border-b lg:border-r border-white/5 flex lg:flex-col items-center py-4 lg:py-8">
+        <div class="lg:mb-10 text-blue-500 scale-110 px-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <nav id="globalNav" class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-x-visible"></nav>
+    </aside>
+
+    <main class="flex-1 p-6 lg:p-10">
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+                <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">Creative Engine</p>
+                <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Content Pipeline Tool</h1>
+            </div>
+            <button onclick="openNewIdea()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">+ Nova Ideia</button>
+        </header>
+
+        <!-- KANBAN BOARD -->
+        <div id="kanbanBoard" class="flex gap-6 overflow-x-auto pb-10">
+            <!-- IDEIA -->
+            <div class="kanban-column space-y-4">
+                <div class="flex items-center justify-between px-2 mb-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">💡 Ideias</h2>
+                    <span class="bg-white/5 text-[10px] px-2 py-0.5 rounded-full" id="count_ideia">0</span>
+                </div>
+                <div id="col_ideia" class="space-y-4"></div>
+            </div>
+            <!-- ROTEIRO -->
+            <div class="kanban-column space-y-4">
+                <div class="flex items-center justify-between px-2 mb-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-indigo-400">📝 Roteirização</h2>
+                    <span class="bg-indigo-500/10 text-[10px] px-2 py-0.5 rounded-full" id="count_roteiro">0</span>
+                </div>
+                <div id="col_roteiro" class="space-y-4"></div>
+            </div>
+            <!-- PRODUÇÃO -->
+            <div class="kanban-column space-y-4">
+                <div class="flex items-center justify-between px-2 mb-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-amber-400">🎬 Produção</h2>
+                    <span class="bg-amber-500/10 text-[10px] px-2 py-0.5 rounded-full" id="count_producao">0</span>
+                </div>
+                <div id="col_producao" class="space-y-4"></div>
+            </div>
+            <!-- EDIÇÃO -->
+            <div class="kanban-column space-y-4">
+                <div class="flex items-center justify-between px-2 mb-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-purple-400">✂️ Edição</h2>
+                    <span class="bg-purple-500/10 text-[10px] px-2 py-0.5 rounded-full" id="count_edicao">0</span>
+                </div>
+                <div id="col_edicao" class="space-y-4"></div>
+            </div>
+            <!-- AGENDADO -->
+            <div class="kanban-column space-y-4">
+                <div class="flex items-center justify-between px-2 mb-4">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-emerald-400">🚀 Publicado</h2>
+                    <span class="bg-emerald-500/10 text-[10px] px-2 py-0.5 rounded-full" id="count_publicado">0</span>
+                </div>
+                <div id="col_publicado" class="space-y-4"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL EDITOR -->
+    <div id="modalEditor" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden z-[2000] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="bg-blue-600 p-6 flex justify-between items-center text-white">
+                <h3 id="modalTitle" class="text-sm font-black uppercase tracking-widest">Content Editor</h3>
+                <button onclick="closeEditor()" class="text-2xl font-light">&times;</button>
+            </div>
+            <form id="contentForm" class="p-8 space-y-6 overflow-y-auto flex-1">
+                <input type="hidden" id="content_id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Título do Conteúdo</label>
+                             <input type="text" id="c_titulo" required class="form-input" placeholder="Ex: Swipe de Licitações 2026"></div>
+                        <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Status / Etapa</label>
+                             <select id="c_status" class="form-input">
+                                <option value="ideia">💡 Ideia</option>
+                                <option value="roteiro">📝 Roteirização</option>
+                                <option value="producao">🎬 Produção</option>
+                                <option value="edicao">✂️ Edição</option>
+                                <option value="publicado">🚀 Publicado</option>
+                             </select></div>
+                        <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Canal</label>
+                             <select id="c_canal" class="form-input"><option>Instagram</option><option>LinkedIn</option><option>YouTube</option><option>TikTok</option></select></div>
+                        <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-2">URL Imagem/Thumbnail</label>
+                             <input type="url" id="c_img" class="form-input" placeholder="https://..."></div>
+                    </div>
+                    <div class="flex flex-col h-full">
+                        <label class="text-[9px] font-black text-slate-500 uppercase block mb-2">Script / Legenda</label>
+                        <textarea id="c_script" class="form-input flex-1 min-h-[300px]" placeholder="Escreva o roteiro completo aqui..."></textarea>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button type="button" id="btnDelete" class="hidden bg-red-900/40 text-red-400 px-6 py-4 rounded-2xl text-xs font-black uppercase transition hover:bg-red-900/60">Excluir</button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition text-white">Salvar na Pipeline</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const menuItems = [
+            { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
+            { title: 'Content Pipeline', icon: '<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>', link: 'content.html' },
+            { title: 'Contratos', icon: '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', link: 'contratos.html' }
+        ];
+
+        async function init() {
+            document.getElementById('globalNav').innerHTML = menuItems.map(m => `
+                <div class="nav-item ${m.title === 'Content Pipeline' ? 'active' : ''}" onclick="location.href='${m.link}'">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg>
+                    <span class="tooltip">${m.title}</span>
+                </div>`).join('');
+            loadContent();
+        }
+
+        async function loadContent() {
+            const { data } = await sb.from('content_pipeline').select('*').order('created_at', {ascending: false});
+            if(!data) return;
+
+            const cols = ['ideia', 'roteiro', 'producao', 'edicao', 'publicado'];
+            cols.forEach(c => {
+                const filtered = data.filter(item => item.status === c);
+                document.getElementById(`count_${c}`).innerText = filtered.length;
+                document.getElementById(`col_${c}`).innerHTML = filtered.map(item => `
+                    <div class="glass-card p-5 content-card border-l-4 ${getStatusBorder(c)}" onclick='editContent(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                        ${item.image_url ? `<img src="${item.image_url}" class="w-full h-32 object-cover rounded-xl mb-3 opacity-80">` : ''}
+                        <h4 class="text-sm font-black text-white leading-tight mb-2 uppercase">${item.titulo}</h4>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[8px] font-black text-blue-400 uppercase tracking-widest">${item.canal}</span>
+                            <span class="text-[8px] font-bold text-slate-500">${new Date(item.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function getStatusBorder(status) {
+            return { ideia: 'border-l-slate-500', roteiro: 'border-l-indigo-500', producao: 'border-l-amber-500', edicao: 'border-l-purple-500', publicado: 'border-l-emerald-500' }[status];
+        }
+
+        function openNewIdea() {
+            document.getElementById('contentForm').reset();
+            document.getElementById('content_id').value = '';
+            document.getElementById('btnDelete').classList.add('hidden');
+            document.getElementById('modalEditor').classList.remove('hidden');
+        }
+
+        function editContent(item) {
+            document.getElementById('content_id').value = item.id;
+            document.getElementById('c_titulo').value = item.titulo;
+            document.getElementById('c_status').value = item.status;
+            document.getElementById('c_canal').value = item.canal;
+            document.getElementById('c_img').value = item.image_url || '';
+            document.getElementById('c_script').value = item.script || '';
+            document.getElementById('btnDelete').classList.remove('hidden');
+            document.getElementById('btnDelete').onclick = () => deleteContent(item.id);
+            document.getElementById('modalEditor').classList.remove('hidden');
+        }
+
+        async function deleteContent(id) {
+            if(confirm('Excluir este conteúdo permanentemente?')) {
+                await sb.from('content_pipeline').delete().eq('id', id);
+                location.reload();
+            }
+        }
+
+        document.getElementById('contentForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('content_id').value;
+            const payload = {
+                titulo: document.getElementById('c_titulo').value,
+                status: document.getElementById('c_status').value,
+                canal: document.getElementById('c_canal').value,
+                image_url: document.getElementById('c_img').value,
+                script: document.getElementById('c_script').value
+            };
+
+            if(id) await sb.from('content_pipeline').update(payload).eq('id', id);
+            else await sb.from('content_pipeline').insert([payload]);
+            location.reload();
+        }
+
+        function closeEditor() { document.getElementById('modalEditor').classList.add('hidden'); }
+        init();
+    </script>
+</body>
+</html>
