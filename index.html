@@ -170,10 +170,10 @@
 
         <!-- INDICADORES -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            <div class="glass-card p-6 clickable" onclick="filterByField('fase', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
+            <div class="glass-card p-6 clickable" onclick="filterByField('status', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
             <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
-            <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500 clickable" onclick="filterByField('fase', 'Concluído')"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Concluídos</p><h3 id="stat_done" class="text-2xl md:text-4xl font-black text-emerald-100">--</h3></div>
-            <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('status', 'Atrasado')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
+            <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500 clickable" onclick="filterByField('status', 'Concluído')"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Concluídos</p><h3 id="stat_done" class="text-2xl md:text-4xl font-black text-emerald-100">--</h3></div>
+            <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
         </div>
 
         <!-- FILTROS -->
@@ -293,7 +293,7 @@
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
             { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
-            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>', link: 'propostas.html' },
+            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
             { title: 'Contratos', icon: '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', link: 'contratos.html' },
             { title: 'Almoxarifado', icon: '<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14v4m0 0l8 4m-8-4l-8 4m8 4l8-4m-8 4V11"/>', link: 'fornecedores.html' },
             { title: 'Inventário', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>', link: 'avaliacao.html' },
@@ -449,7 +449,15 @@
             const hom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
             if(document.getElementById('stat_val')) document.getElementById('stat_val').innerText = formatBRL(est);
             if(document.getElementById('stat_save')) document.getElementById('stat_save').innerText = formatBRL(est - hom);
-            if(document.getElementById('stat_delay')) document.getElementById('stat_delay').innerText = ativos.filter(i => getAging(i.data_prevista, i.status).label.includes('Atrasado')).length;
+            
+            // CORREÇÃO: Alinhamento do filtro de atrasados com a lógica real de dias úteis
+            if(document.getElementById('stat_delay')) {
+                const countDelay = ativos.filter(i => {
+                    const aging = getAging(i.data_prevista, i.status);
+                    return aging.label.includes('Atrasado');
+                }).length;
+                document.getElementById('stat_delay').innerText = countDelay;
+            }
             
             const table = document.getElementById('mainTable');
             if(table) {
@@ -462,6 +470,7 @@
                         if (!d || d === 'None' || d === '') return '-';
                         const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
                         if (parts.length !== 3) return '-';
+                        // Assume YYYY-MM-DD do banco
                         return `${parts[2]}/${parts[1]}/${parts[0]}`;
                     };
 
@@ -502,7 +511,7 @@
             if (cResp) {
                 const resData = countBy('responsavel');
                 const labels = Object.keys(resData).sort((a,b) => (a==='N/I'?1:b==='N/I'?-1:resData[b]-resData[a]));
-                charts.resp = new Chart(cResp, { type: 'bar', data: { labels, datasets: [{ data: labels.map(l => resData[l]), backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { indexAxis: 'y', maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('responsavel', labels[activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } } });
+                charts.resp = new Chart(cResp, { type: 'bar', data: { labels, datasets: [{ data: labels.map(l => resData[l]), backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { indexAxis: 'y', maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('responsavel', labels[activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#64748b', font: { size: 9 } } } } } });
             }
             if(charts.stat) charts.stat.destroy();
             const cStatus = document.getElementById('chartStatus');
