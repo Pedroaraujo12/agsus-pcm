@@ -9,43 +9,129 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --glass: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at top left, #0f172a, #020617); color: #f8fafc; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-        @media (min-width: 1024px) { body { flex-direction: row; overflow: hidden; } }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .sidebar { width: 100%; height: auto; display: flex; flex-direction: row; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; justify-content: space-around; overflow-x: auto; }
-        @media (min-width: 1024px) { .sidebar { width: 80px; height: 100vh; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.05); border-bottom: none; padding: 24px 0; justify-content: flex-start; overflow-x: hidden; } }
-        .nav-item { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748b; transition: all 0.3s; cursor: pointer; flex-shrink: 0; }
-        @media (min-width: 1024px) { .nav-item { margin-bottom: 16px; width: 44px; height: 44px; } }
-        .nav-item:hover, .nav-item.active { color: #ffffff; background: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-        .nav-item::after { content: attr(data-title); position: absolute; left: 60px; background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); z-index: 200; }
-        @media (min-width: 1024px) { .nav-item:hover::after { opacity: 1; left: 70px; } }
+        :root { 
+            --bg-deep: #000000;
+            --glass: rgba(18, 18, 18, 0.7); 
+            --accent: #3b82f6; 
+            --glow: rgba(59, 130, 246, 0.3);
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #000000 50%),
+                        radial-gradient(circle at 100% 100%, #1e1b4b 0%, #000000 50%);
+            color: #f8fafc; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
+        }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
+        
+        .glass-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 1.5rem; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        
+        .sidebar { 
+            width: 100%; 
+            height: auto; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            z-index: 100; 
+            justify-content: space-around; 
+            flex-shrink: 0; 
+            background: rgba(0, 0, 0, 0.9); 
+        }
+        @media (min-width: 1024px) { 
+            .sidebar { 
+                width: 80px; 
+                height: 100vh; 
+                flex-direction: column; 
+                border-right: 1px solid rgba(255,255,255,0.05); 
+                border-bottom: none; 
+                padding: 24px 0; 
+                justify-content: flex-start; 
+                position: sticky; 
+                top: 0; 
+            } 
+        }
+        
+        .nav-item { 
+            position: relative; 
+            width: 48px; 
+            height: 48px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 14px; 
+            margin-bottom: 12px; 
+            color: #64748b; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+        }
+        .nav-item:hover, .nav-item.active { 
+            color: #ffffff; 
+            background: var(--accent); 
+            box-shadow: 0 0 20px var(--glow); 
+            transform: scale(1.05); 
+        }
+        @media (min-width: 1024px) {
+            .nav-item .tooltip { 
+                visibility: hidden; 
+                position: absolute; 
+                background: #111; 
+                color: white; 
+                padding: 6px 12px; 
+                border-radius: 8px; 
+                font-size: 11px; 
+                font-weight: 800; 
+                text-transform: uppercase; 
+                white-space: nowrap; 
+                border: 1px solid rgba(255,255,255,0.1); 
+                z-index: 1000; 
+                opacity: 0; 
+                transition: 0.2s; 
+                pointer-events: none; 
+                left: 140%; 
+                top: 50%; 
+                transform: translateY(-50%); 
+            }
+            .nav-item:hover .tooltip { visibility: visible; opacity: 1; }
+        }
+        
         .main-container { flex: 1; padding: 16px; overflow-y: auto; width: 100%; }
-        @media (min-width: 1024px) { .main-container { padding: 32px; height: 100vh; } }
-        .status-pill { font-size: 9px; padding: 4px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        @media (min-width: 1024px) { .main-container { padding: 32px; } }
+        
+        .status-pill { font-size: 9px; padding: 4px 10px; border-radius: 20px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.05); }
         .alice-shield { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 10px; }
         .alice-blocked { color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
         .alice-safe { color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     </style>
 </head>
 <body class="flex">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar glass-card">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-110">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </div>
+    <aside class="sidebar">
+        <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
         <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
-        <div class="hidden lg:flex mt-auto opacity-50"><div class="w-10 h-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px] font-bold">PA</div></div>
     </aside>
 
     <main class="main-container">
         <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div class="w-full">
                 <p class="text-[10px] font-medium text-blue-400 uppercase tracking-widest mb-1">Módulo de Publicidade</p>
-                <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight leading-none">Gestão de <br class="md:hidden"> Editais & PNCP</h1>
+                <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none">Gestão de Editais & PNCP</h1>
             </div>
             <div class="flex gap-3 w-full md:w-auto">
                 <div class="glass-card px-6 py-4 rounded-2xl text-[10px] font-black uppercase border border-white/10 flex items-center gap-3">
@@ -54,46 +140,38 @@
             </div>
         </header>
 
-        <!-- INDICADORES DE COMPLIANCE -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="glass-card p-6 rounded-[1.5rem]"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Publicados PNCP</p><h3 id="stat_published" class="text-3xl font-black">--</h3></div>
-            <div class="glass-card p-6 rounded-[1.5rem] text-amber-400"><p class="text-[10px] font-bold text-amber-500/50 uppercase mb-1">Em Elaboração</p><h3 id="stat_draft" class="text-3xl font-black">--</h3></div>
-            <div class="glass-card p-6 rounded-[1.5rem] text-emerald-400"><p class="text-[10px] font-bold text-emerald-500/50 uppercase mb-1">Score Médio Alice</p><h3 id="stat_alice" class="text-3xl font-black">--</h3></div>
-            <div class="glass-card p-6 rounded-[1.5rem] border-l-4 border-l-red-500 text-red-100"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Bloqueios Risco</p><h3 id="stat_blocked" class="text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Publicados PNCP</p><h3 id="stat_published" class="text-2xl md:text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6 text-amber-400"><p class="text-[10px] font-bold text-amber-500/50 uppercase mb-1">Em Elaboração</p><h3 id="stat_draft" class="text-2xl md:text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6 text-emerald-400"><p class="text-[10px] font-bold text-emerald-500/50 uppercase mb-1">Score Médio Alice</p><h3 id="stat_alice" class="text-2xl md:text-3xl font-black">--</h3></div>
+            <div class="glass-card p-6 border-l-4 border-l-red-500 text-red-100"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Bloqueios Risco</p><h3 id="stat_blocked" class="text-2xl md:text-3xl font-black">--</h3></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- TABELA DE EDITAIS -->
-            <div class="lg:col-span-2 glass-card rounded-[2rem] overflow-hidden">
+            <div class="lg:col-span-2 glass-card overflow-hidden">
                 <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
                     <h2 class="text-xs font-bold uppercase text-slate-400 tracking-widest">Fase Externa e Compliance</h2>
                     <span id="rowCount" class="text-[9px] font-bold bg-slate-800 px-3 py-1 rounded-full text-slate-500">-- registros</span>
                 </div>
                 <div class="overflow-x-auto p-6">
-                    <table class="w-full text-left table-fixed">
+                    <table class="w-full text-left">
                         <thead>
-                            <tr class="text-[9px] font-black uppercase text-slate-500 tracking-tighter border-b border-white/10">
-                                <th class="w-[20%] pb-4">Edital / Processo</th>
-                                <th class="w-[30%] pb-4 text-center">Status PNCP</th>
-                                <th class="w-[15%] pb-4 text-center">Alice Score</th>
-                                <th class="w-[15%] pb-4 text-center">Data Pub.</th>
-                                <th class="w-[20%] pb-4 text-right">Ações</th>
+                            <tr class="text-[9px] font-black uppercase text-slate-500 tracking-wider border-b border-white/10">
+                                <th class="pb-4">Edital / Processo</th>
+                                <th class="pb-4 text-center">Status PNCP</th>
+                                <th class="pb-4 text-center">Alice Score</th>
+                                <th class="pb-4 text-center">Data Pub.</th>
+                                <th class="pb-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="editalTable" class="text-[10px] divide-y divide-white/5"></tbody>
+                        <tbody id="editalTable" class="text-[11px] divide-y divide-white/5"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ANÁLISE DE RISCO GRÁFICA -->
             <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl h-[250px]"><h2 class="text-[10px] font-bold uppercase text-blue-400 mb-4">Status de Publicidade</h2><canvas id="chartPncp"></canvas></div>
-                <div class="glass-card p-6 rounded-2xl h-[250px] border-l-4 border-l-red-500"><h2 class="text-[10px] font-bold uppercase text-red-400 mb-4">Distribuição de Risco (Alice)</h2><canvas id="chartAlice"></canvas></div>
-                
-                <div class="glass-card p-6 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                    <h3 class="text-[10px] font-black text-indigo-400 uppercase mb-2">Protocolo Alice CGU</h3>
-                    <p class="text-[10px] text-slate-400 leading-relaxed">De acordo com o CDA 23/2025, editais com score superior a 70 são automaticamente bloqueados para publicação externa até revisão da UJUR.</p>
-                </div>
+                <div class="glass-card p-6 h-[250px]"><h2 class="text-[10px] font-bold uppercase text-blue-400 mb-4 text-center">Status de Publicidade</h2><canvas id="chartPncp"></canvas></div>
+                <div class="glass-card p-6 h-[250px] border-l-4 border-l-red-500"><h2 class="text-[10px] font-bold uppercase text-red-400 mb-4 text-center">Distribuição de Risco (Alice)</h2><canvas id="chartAlice"></canvas></div>
             </div>
         </div>
     </main>
@@ -106,25 +184,24 @@
 
         const menuItems = [
             { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
-            { title: 'Novo Processo', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
             { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
-            { title: 'Fornecedores', icon: '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'fornecedores.html' },
             { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
-            { title: 'Avaliação', icon: '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'avaliacao.html' },
-            { title: 'Contratos', icon: '<path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>', link: 'contratos.html' },
-            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path>', link: 'pagamentos.html' },
-            { title: 'Relatórios', icon: '<path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z"></path><path d="M14 4v4h4"></path>', link: 'relatorios.html' }
+            { title: 'Contratos', icon: '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', link: 'contratos.html' },
+            { title: 'Almoxarifado', icon: '<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14v4m0 0l8 4m-8-4l-8 4m8 4l8-4m-8 4V11"/>', link: 'fornecedores.html' },
+            { title: 'Inventário', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>', link: 'avaliacao.html' },
+            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'pagamentos.html' },
+            { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'Governança', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
         ];
 
         async function init() {
-            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='editais.html'?'active':''}" data-title="${m.title}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg></div>`).join('');
+            document.getElementById('globalNav').innerHTML = menuItems.map(m => `<div class="nav-item ${m.link==='editais.html'?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
             
             const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
             if (error) return;
 
-            document.getElementById('rowCount').innerText = data.length + " registros";
+            document.getElementById('rowCount').innerText = data.length + " PROCESSOS";
 
-            // Simulação de Dados Alice/PNCP para análise
             let published = 0, draft = 0, totalScore = 0, blocked = 0;
             const aliceData = { low: 0, med: 0, high: 0 };
 
@@ -143,39 +220,38 @@
                 const statusPill = isPublished ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
 
                 return `
-                <tr class="hover:bg-white/5 transition">
-                    <td class="px-6 py-4">
-                        <div class="font-black text-slate-100 text-[11px] mb-0.5 truncate">${i.id_processo}</div>
-                        <div class="text-[8px] text-slate-500 uppercase truncate">${i.objeto_resumido}</div>
+                <tr class="row-hover transition">
+                    <td class="p-4">
+                        <div class="font-black text-slate-100 text-sm mb-0.5 truncate">${i.id_processo}</div>
+                        <div class="text-[10px] text-slate-400 uppercase truncate max-w-[200px] font-semibold">${i.objeto_resumido}</div>
                     </td>
-                    <td class="px-6 py-4 text-center">
+                    <td class="p-4 text-center">
                         <span class="status-pill ${statusPill}">${isPublished ? 'Publicado PNCP' : 'Elaboração'}</span>
                     </td>
-                    <td class="px-6 py-4 text-center">
+                    <td class="p-4 text-center">
                         <div class="alice-shield p-2 rounded-lg ${aliceClass} justify-center">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001z" clip-rule="evenodd"></path></svg>
                             ${score > 0 ? score : '--'}
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-center text-slate-400 font-bold">${i.data_entrada ? new Date(i.data_entrada).toLocaleDateString('pt-br') : '--/--/--'}</td>
-                    <td class="px-6 py-4 text-right">
+                    <td class="p-4 text-center text-slate-400 font-bold">${i.data_entrada ? new Date(i.data_entrada).toLocaleDateString('pt-br') : '--/--/--'}</td>
+                    <td class="p-4 text-right">
                         <button class="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/30 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition">PNCP</button>
                     </td>
                 </tr>`;
             }).join('');
 
-            // Atualiza Indicadores
             document.getElementById('stat_published').innerText = published;
             document.getElementById('stat_draft').innerText = draft;
-            document.getElementById('stat_alice').innerText = (totalScore/data.length).toFixed(1);
+            document.getElementById('stat_alice').innerText = data.length > 0 ? (totalScore/data.length).toFixed(1) : "0.0";
             document.getElementById('stat_blocked').innerText = blocked;
 
             renderCharts(published, draft, aliceData);
         }
 
         function renderCharts(pub, drf, alice) {
-            draw('chartPncp', 'doughnut', ['Publicados', 'Em Elaboração'], [pub, drf], ['#10b981', '#f59e0b']);
-            draw('chartAlice', 'bar', ['Baixo (0-30)', 'Médio (31-70)', 'Alto (>70)'], [alice.low, alice.med, alice.high], ['#10b981', '#f59e0b', '#ef4444'], true);
+            draw('chartPncp', 'doughnut', ['Publicados', 'Em Elaboração'], [pub, drf], ['#3b82f6', '#f59e0b']);
+            draw('chartAlice', 'bar', ['Baixo', 'Médio', 'Alto'], [alice.low, alice.med, alice.high], ['#10b981', '#f59e0b', '#ef4444'], true);
         }
 
         function draw(id, type, labels, values, color, horiz = false) {
@@ -186,7 +262,7 @@
                 options: { 
                     indexAxis: horiz ? 'y' : 'x', maintainAspectRatio: false, 
                     plugins: { legend: { display: type === 'doughnut', position: 'right', labels: { color: '#94a3b8', font: { size: 8 } } } }, 
-                    scales: { x: { display: type !== 'doughnut', grid: { display: false }, ticks: { color: '#475569', font: { size: 8 } } }, y: { display: type !== 'doughnut', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#475569', font: { size: 8 } } } } 
+                    scales: { x: { display: type !== 'doughnut', grid: { display: false }, ticks: { color: '#64748b', font: { size: 8 } } }, y: { display: type !== 'doughnut', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 8 } } } } 
                 } 
             });
         }
