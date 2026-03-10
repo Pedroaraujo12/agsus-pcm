@@ -25,7 +25,6 @@
             display: flex; 
             flex-direction: column; 
             overflow-x: hidden; 
-            overflow-y: auto; 
         }
         @media (min-width: 1024px) { body { flex-direction: row; } }
         
@@ -38,18 +37,21 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
         }
         
+        /* SIDEBAR RESPONSIVA FIX */
         .sidebar { 
             width: 100%; 
-            height: auto; 
+            height: 64px; 
             display: flex; 
             flex-direction: row; 
             align-items: center; 
-            padding: 12px; 
+            padding: 0 16px; 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
-            z-index: 100; 
-            justify-content: space-around; 
+            z-index: 1000; 
+            justify-content: space-between; 
             flex-shrink: 0; 
-            background: rgba(0, 0, 0, 0.9); 
+            background: rgba(0, 0, 0, 0.95);
+            position: sticky;
+            top: 0;
         }
         @media (min-width: 1024px) { 
             .sidebar { 
@@ -65,51 +67,75 @@
             } 
         }
         
+        .nav-container {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0;
+            scrollbar-width: none;
+        }
+        .nav-container::-webkit-scrollbar { display: none; }
+
+        @media (min-width: 1024px) {
+            .nav-container {
+                flex-direction: column;
+                overflow-x: visible;
+                gap: 8px;
+            }
+        }
+        
         .nav-item { 
             position: relative; 
-            width: 48px; 
-            height: 48px; 
+            width: 40px; 
+            height: 40px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            border-radius: 14px; 
-            margin-bottom: 12px; 
+            border-radius: 12px; 
             color: #64748b; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             cursor: pointer; 
+            flex-shrink: 0;
         }
+        @media (min-width: 1024px) {
+            .nav-item { width: 48px; height: 48px; margin-bottom: 8px; }
+        }
+
         .nav-item:hover, .nav-item.active { 
             color: #ffffff; 
             background: var(--accent); 
             box-shadow: 0 0 20px var(--glow); 
             transform: scale(1.05); 
         }
-        @media (min-width: 1024px) {
-            .nav-item .tooltip { 
-                visibility: hidden; 
-                position: absolute; 
-                background: #111; 
-                color: white; 
-                padding: 6px 12px; 
-                border-radius: 8px; 
-                font-size: 11px; 
-                font-weight: 800; 
-                text-transform: uppercase; 
-                white-space: nowrap; 
-                border: 1px solid rgba(255,255,255,0.1); 
-                z-index: 1000; 
-                opacity: 0; 
-                transition: 0.2s; 
-                pointer-events: none; 
-                left: 140%; 
-                top: 50%; 
-                transform: translateY(-50%); 
-            }
-            .nav-item:hover .tooltip { visibility: visible; opacity: 1; }
+
+        .nav-item .tooltip { 
+            visibility: hidden; 
+            position: absolute; 
+            background: #111; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            z-index: 1000; 
+            opacity: 0; 
+            transition: 0.2s; 
+            pointer-events: none; 
+            left: 140%; 
+            top: 50%; 
+            transform: translateY(-50%); 
         }
+        @media (min-width: 1024px) { .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
+        
+        .main-content { flex: 1; padding: 16px; width: 100%; }
+        @media (min-width: 1024px) { .main-content { padding: 40px; } }
         
         .status-badge { 
-            font-size: 11px; 
+            font-size: 10px; 
             padding: 4px 12px; 
             border-radius: 20px; 
             font-weight: 800; 
@@ -118,12 +144,13 @@
             border: 1px solid rgba(255,255,255,0.08); 
         }
         .aging-badge { 
-            font-size: 10px; 
+            font-size: 9px; 
             padding: 4px 10px; 
             border-radius: 6px; 
             font-weight: 900; 
             text-transform: uppercase; 
             white-space: nowrap; 
+            display: inline-block;
         }
         .form-input { 
             background: rgba(0, 0, 0, 0.4); 
@@ -134,29 +161,25 @@
             outline: none; 
             width: 100%; 
             font-size: 13px; 
-            transition: 0.2s; 
         }
-        .form-input:focus {
-            border-color: var(--accent);
-            background: rgba(0, 0, 0, 0.6);
-        }
+        .form-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); }
+        
         .table-wrapper { width: 100%; overflow-x: auto; border-radius: 1rem; }
-        table { width: 100%; min-width: 800px; border-collapse: separate; border-spacing: 0 8px; }
-        .row-hover:hover { 
-            background: rgba(255,255,255,0.02); 
-            box-shadow: inset 0 0 20px rgba(255,255,255,0.01);
-        }
+        table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0 8px; }
+        .row-hover:hover { background: rgba(255,255,255,0.02); }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-        ::-webkit-scrollbar-track { background: transparent; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="hidden lg:flex mb-10 text-blue-500 scale-110"><svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-        <nav id="globalNav" class="flex flex-row lg:flex-col gap-2"></nav>
+        <div class="text-blue-500 scale-110 flex items-center justify-center">
+            <svg class="w-6 h-6 lg:w-8 lg:h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <nav id="globalNav" class="nav-container"></nav>
+        <div class="hidden lg:block w-8"></div> <!-- Spacer for mobile symmetry -->
     </aside>
 
     <main class="main-content">
@@ -305,15 +328,18 @@
         function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
         function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
 
-        // LÓGICA DE TI SENIOR: Cálculo de Dias Úteis Reais (Business Days Engine v2.0)
+        // LÓGICA DE TI SENIOR: Cálculo de Dias Úteis Reais (Business Days Engine v3.0)
         function isHoliday(date) {
             const holidays = [
                 '2026-01-01', '2026-02-16', '2026-02-17', '2026-04-03', '2026-04-21',
                 '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12', '2026-11-02',
                 '2026-11-15', '2026-11-20', '2026-12-25'
             ];
-            // Fix timezone shift for string comparison
-            const s = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            // Fix timezone shift for string comparison (safe local date)
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const s = `${y}-${m}-${d}`;
             return holidays.includes(s);
         }
 
@@ -352,7 +378,6 @@
             if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'S/ PRAZO', class: 'bg-slate-800 text-slate-500' };
             
             try {
-                // TI MASTER FIX: Parsing robusto independente de formato ISO ou BR
                 let target;
                 if (dateStr.includes('/')) {
                     const [d, m, y] = dateStr.split('/');
@@ -371,7 +396,6 @@
                 if (diffDays <= 2) return { label: `Vence ${diffDays} DU`, class: 'bg-amber-500/20 text-amber-500 border border-amber-500/50' };
                 return { label: `SLA OK (${diffDays} DU)`, class: 'bg-emerald-500/20 text-emerald-500' };
             } catch (e) {
-                console.error("Erro no processamento de aging:", e);
                 return { label: 'ERRO DATA', class: 'bg-red-900 text-white' };
             }
         }
@@ -450,7 +474,6 @@
             if(document.getElementById('stat_val')) document.getElementById('stat_val').innerText = formatBRL(est);
             if(document.getElementById('stat_save')) document.getElementById('stat_save').innerText = formatBRL(est - hom);
             
-            // CORREÇÃO: Alinhamento do filtro de atrasados com a lógica real de dias úteis
             if(document.getElementById('stat_delay')) {
                 const countDelay = ativos.filter(i => {
                     const aging = getAging(i.data_prevista, i.status);
@@ -465,12 +488,12 @@
                     const aging = getAging(i.data_prevista, i.status);
                     const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
                     
-                    // TI MASTER FIX: Normalização de exibição de data DD/MM/AAAA
                     const formatDateTI = (d) => {
                         if (!d || d === 'None' || d === '') return '-';
                         const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
-                        if (parts.length !== 3) return '-';
-                        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        if (d.includes('/')) return d;
+                        return '-';
                     };
 
                     const dtPrevStr = formatDateTI(i.data_prevista);
@@ -485,11 +508,11 @@
                         <td class="p-4 text-center">
                             <div class="flex flex-col items-center gap-1">
                                 <span class="aging-badge ${aging.class}">${aging.label}</span>
-                                <span class="text-[10px] text-slate-500 font-bold">${dtPrevStr}</span>
+                                <span class="text-[10px] text-slate-400 font-bold">${dtPrevStr}</span>
                             </div>
                         </td>
                         <td class="p-4 text-center">
-                            <span class="text-[11px] font-black text-slate-300">${dtFinalStr}</span>
+                            <span class="text-[11px] font-black text-slate-200">${dtFinalStr}</span>
                         </td>
                         <td class="p-4 text-right font-black text-slate-100 text-sm">${formatBRL(i.vlr_estimado_anual)}</td>
                         <td class="p-4 text-center"><div class="flex justify-center gap-3"><button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td>
