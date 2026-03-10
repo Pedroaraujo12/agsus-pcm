@@ -37,6 +37,7 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
         }
         
+        /* SIDEBAR RESPONSIVA FIX */
         .sidebar { 
             width: 100%; 
             height: 64px; 
@@ -66,29 +67,101 @@
             } 
         }
         
-        .nav-container { display: flex; flex-direction: row; gap: 12px; overflow-x: auto; padding: 4px 0; scrollbar-width: none; }
+        .nav-container {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0;
+            scrollbar-width: none;
+        }
         .nav-container::-webkit-scrollbar { display: none; }
-        @media (min-width: 1024px) { .nav-container { flex-direction: column; overflow-x: visible; gap: 8px; } }
+
+        @media (min-width: 1024px) {
+            .nav-container {
+                flex-direction: column;
+                overflow-x: visible;
+                gap: 8px;
+            }
+        }
         
         .nav-item { 
-            position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
-            border-radius: 12px; color: #64748b; transition: all 0.3s; cursor: pointer; flex-shrink: 0;
+            position: relative; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 12px; 
+            color: #64748b; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+            flex-shrink: 0;
         }
-        @media (min-width: 1024px) { .nav-item { width: 48px; height: 48px; margin-bottom: 8px; } }
-        .nav-item:hover, .nav-item.active { color: #ffffff; background: var(--accent); box-shadow: 0 0 20px var(--glow); transform: scale(1.05); }
+        @media (min-width: 1024px) {
+            .nav-item { width: 48px; height: 48px; margin-bottom: 8px; }
+        }
+
+        .nav-item:hover, .nav-item.active { 
+            color: #ffffff; 
+            background: var(--accent); 
+            box-shadow: 0 0 20px var(--glow); 
+            transform: scale(1.05); 
+        }
+
         .nav-item .tooltip { 
-            visibility: hidden; position: absolute; background: #111; color: white; padding: 6px 12px; border-radius: 8px; 
-            font-size: 11px; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); 
-            z-index: 1000; opacity: 0; transition: 0.2s; pointer-events: none; left: 140%; top: 50%; transform: translateY(-50%); 
+            visibility: hidden; 
+            position: absolute; 
+            background: #111; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            z-index: 1000; 
+            opacity: 0; 
+            transition: 0.2s; 
+            pointer-events: none; 
+            left: 140%; 
+            top: 50%; 
+            transform: translateY(-50%); 
         }
         @media (min-width: 1024px) { .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
         
         .main-content { flex: 1; padding: 16px; width: 100%; }
         @media (min-width: 1024px) { .main-content { padding: 40px; } }
         
-        .status-badge { font-size: 10px; padding: 4px 12px; border-radius: 20px; font-weight: 800; text-transform: uppercase; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
-        .aging-badge { font-size: 9px; padding: 4px 10px; border-radius: 6px; font-weight: 900; text-transform: uppercase; white-space: nowrap; display: inline-block; }
-        .form-input { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; color: white; outline: none; width: 100%; font-size: 13px; }
+        .status-badge { 
+            font-size: 10px; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.08); 
+        }
+        .aging-badge { 
+            font-size: 9px; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            display: inline-block;
+        }
+        .form-input { 
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 12px; 
+            padding: 12px; 
+            color: white; 
+            outline: none; 
+            width: 100%; 
+            font-size: 13px; 
+        }
         .form-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); }
         
         .table-wrapper { width: 100%; overflow-x: auto; border-radius: 1rem; }
@@ -229,7 +302,7 @@
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Prazo da Tarefa</label><input type="date" id="edit_dt_prev" class="form-input"></div>
                     <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Entrega Final</label><input type="date" id="edit_dt_entrega" class="form-input"></div>
                 </div>
-                <button type="submit" id="btnSave" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition">Salvar Alterações</button>
+                <button type="submit" id="btnSave" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition shadow-lg shadow-blue-500/30">Salvar Alterações</button>
             </form>
         </div>
     </div>
@@ -376,7 +449,13 @@
             const est = data.reduce((acc, i) => acc + cleanNum(i.vlr_estimado_anual), 0);
             const hom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
             if(document.getElementById('stat_val')) document.getElementById('stat_val').innerText = formatBRL(est);
-            if(document.getElementById('stat_delay')) document.getElementById('stat_delay').innerText = ativos.filter(i => getAging(i.data_prevista, i.status).label.includes('Atrasado')).length;
+            if(document.getElementById('stat_delay')) {
+                const countDelay = ativos.filter(i => {
+                    const aging = getAging(i.data_prevista, i.status);
+                    return aging.label.includes('Atrasado');
+                }).length;
+                document.getElementById('stat_delay').innerText = countDelay;
+            }
             
             const table = document.getElementById('mainTable');
             if(table) {
@@ -388,7 +467,8 @@
                         if (!d || d === 'None' || d === '') return '-';
                         const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
                         if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                        return d;
+                        if (d.includes('/')) return d;
+                        return '-';
                     };
 
                     return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
@@ -400,7 +480,9 @@
                                 <span class="text-[10px] text-slate-400 font-bold">${formatDt(i.data_prevista)}</span>
                             </div>
                         </td>
-                        <td class="p-4 text-center font-black text-slate-200">${formatDt(i.data_entrega_final)}</td>
+                        <td class="p-4 text-center">
+                            <span class="text-[11px] font-black text-slate-200">${formatDt(i.data_entrega_final)}</span>
+                        </td>
                         <td class="p-4 text-right font-black text-slate-100 text-sm">${formatBRL(i.vlr_estimado_anual)}</td>
                         <td class="p-4 text-center"><div class="flex justify-center gap-3"><button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td>
                     </tr>`;
