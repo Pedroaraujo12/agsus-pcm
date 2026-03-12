@@ -158,6 +158,7 @@
                         <thead>
                             <tr class="text-[9px] font-black uppercase text-slate-500 tracking-wider border-b border-white/10">
                                 <th class="pb-4">Edital / Processo</th>
+                                <th class="pb-4">Responsável</th>
                                 <th class="pb-4 text-center">Status PNCP</th>
                                 <th class="pb-4 text-center">Alice Score</th>
                                 <th class="pb-4 text-center">Data Pub.</th>
@@ -225,6 +226,7 @@
                         <div class="font-black text-slate-100 text-sm mb-0.5 truncate">${i.id_processo}</div>
                         <div class="text-[10px] text-slate-400 uppercase truncate max-w-[200px] font-semibold">${i.objeto_resumido}</div>
                     </td>
+                    <td class="p-4 text-sm font-medium text-slate-300">${i.demandante || '--'}</td>
                     <td class="p-4 text-center">
                         <span class="status-pill ${statusPill}">${isPublished ? 'Publicado PNCP' : 'Elaboração'}</span>
                     </td>

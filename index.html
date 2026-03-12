@@ -233,7 +233,9 @@
                             <thead>
                                 <tr class="text-[11px] font-black uppercase text-slate-400 tracking-wider border-b border-white/10">
                                     <th class="pb-4 pl-4">ID Processo</th>
-                                    <th class="pb-4">Etapa / Status</th>
+                                    <th class="pb-4">Responsável</th>
+                                    <th class="pb-4">Etapa Atual</th>
+                                    <th class="pb-4">Status</th>
                                     <th class="pb-4 text-center">Prazo Tarefa</th>
                                     <th class="pb-4 text-center">Entrega Final</th>
                                     <th class="pb-4 text-right">Estimado</th>
@@ -473,6 +475,7 @@
 
                     return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
                         <td class="p-4 font-black text-blue-400">${processIdHtml}</td>
+                        <td class="p-4 text-xs font-medium text-slate-300">${i.responsavel || '--'}</td>
                         <td class="p-4"><div class="font-bold text-slate-100 text-sm">${i.fase_atual || 'N/I'}</div><div class="text-[10px] text-slate-400 uppercase truncate max-w-[200px] font-semibold">${i.objeto_resumido}</div></td>
                         <td class="p-4 text-center">
                             <div class="flex flex-col items-center gap-1">
