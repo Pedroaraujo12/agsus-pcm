@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,92 +7,75 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { border: '#e2e8f0', background: '#0f172a' } } } }
+    </script>
     <style>
-        :root { 
-            --bg-deep: #050505;
-            --glass: rgba(255, 255, 255, 0.03); 
-            --accent: #2563eb; 
-        }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-deep); color: #e2e8f0; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; }
-        .row-hover:hover { background: rgba(255,255,255,0.03); }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
+        .bg-card { background: #1e293b; }
+        .border-border { border: 1px solid #334155; }
     </style>
 </head>
-<body class="p-6 md:p-12">
-    <header class="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div>
-            <h1 class="text-3xl font-black text-white uppercase tracking-tighter">AgSUS PCM</h1>
-            <p class="text-slate-500 text-sm">Gestão Estratégica de Licitações</p>
-        </div>
-        <button onclick="location.href='novo-processo.html'" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-sm transition">
-            + Novo Processo
-        </button>
-    </header>
+<body class="flex h-screen bg-slate-950">
 
-    <main class="max-w-7xl mx-auto space-y-8">
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-border bg-slate-900 hidden md:flex flex-col p-6">
+        <h2 class="text-xl font-bold mb-10 text-white tracking-tighter">AgSUS PCM</h2>
+        <nav class="space-y-4">
+            <a href="#" class="block text-blue-400 font-medium">Dashboard</a>
+            <a href="#" class="block text-slate-400 hover:text-white transition">Licitações</a>
+            <a href="#" class="block text-slate-400 hover:text-white transition">Processos</a>
+            <a href="#" class="block text-slate-400 hover:text-white transition">Configurações</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-8">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold">Gestão Estratégica</h1>
+                <p class="text-slate-400 text-sm">Monitoramento de Licitações</p>
+            </div>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">+ Novo Processo</button>
+        </header>
+
         <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="glass-card p-6">
-                <p class="text-xs text-slate-500 font-bold uppercase">Ativos</p>
-                <h3 id="totalProcessos" class="text-3xl font-black text-white">-</h3>
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="bg-card p-6 rounded-lg border border-border">
+                <p class="text-xs text-slate-400 font-medium">Ativos</p>
+                <h3 id="totalProcessos" class="text-3xl font-bold">-</h3>
             </div>
-            <div class="glass-card p-6">
-                <p class="text-xs text-slate-500 font-bold uppercase">Valor Est.</p>
-                <h3 id="vlrEstimado" class="text-xl font-bold text-white">R$ 0,00</h3>
+            <div class="bg-card p-6 rounded-lg border border-border">
+                <p class="text-xs text-slate-400 font-medium">Valor Total</p>
+                <h3 id="vlrEstimado" class="text-xl font-bold">R$ 0,00</h3>
             </div>
-            <div class="glass-card p-6 border-l-4 border-emerald-500">
-                <p class="text-xs text-emerald-500 font-bold uppercase">Concluídos</p>
-                <h3 id="totalConcluidos" class="text-3xl font-black text-white">-</h3>
-            </div>
-            <div class="glass-card p-6 border-l-4 border-red-500">
-                <p class="text-xs text-red-500 font-bold uppercase">Atrasos</p>
-                <h3 id="totalAtrasos" class="text-3xl font-black text-white">-</h3>
-            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-card p-4 rounded-lg border border-border mb-6 flex gap-4">
+            <input type="text" id="search" placeholder="Filtrar por ID..." class="bg-slate-900 px-3 py-2 rounded text-sm w-full outline-none border border-slate-700">
+            <select id="statusFilter" class="bg-slate-900 px-3 py-2 rounded text-sm border border-slate-700">
+                <option value="Todos">Status</option>
+            </select>
         </div>
 
         <!-- Table -->
-        <div class="glass-card p-6 overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="text-xs text-slate-500 uppercase border-b border-white/5">
-                        <th class="p-3">ID Processo</th>
-                        <th class="p-3">Objeto</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3 text-right">Valor</th>
+        <div class="bg-card rounded-lg border border-border overflow-hidden">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-slate-800 text-slate-300 uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="p-4">Processo</th>
+                        <th class="p-4">Objeto</th>
+                        <th class="p-4">Status</th>
+                        <th class="p-4 text-right">Valor</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="text-sm divide-y divide-white/5"></tbody>
+                <tbody id="tableBody" class="divide-y divide-border"></tbody>
             </table>
         </div>
     </main>
 
-    <script>
-        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        async function init() {
-            const { data } = await sb.from('licitacoes').select('*');
-            const tbody = document.getElementById('tableBody');
-            
-            let totalVlr = 0;
-            data.forEach(item => {
-                const vlr = parseFloat(item.vlr_estimado_anual) || 0;
-                totalVlr += vlr;
-                tbody.innerHTML += `
-                    <tr class="row-hover cursor-pointer" onclick="openDetails('${item.id_processo}')">
-                        <td class="p-3 text-blue-400 font-bold">${item.id_processo}</td>
-                        <td class="p-3 text-slate-300">${item.objeto_resumido || 'N/I'}</td>
-                        <td class="p-3"><span class="bg-blue-900 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span></td>
-                        <td class="p-3 text-right text-white font-mono">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
-                    </tr>
-                `;
-            });
-            document.getElementById('totalProcessos').innerText = data.length;
-            document.getElementById('vlrEstimado').innerText = totalVlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-        }
-        init();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
