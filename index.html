@@ -48,14 +48,17 @@
 
         <!-- Filters -->
         <div class="glass-card p-4 mb-8 flex gap-4">
-            <input type="text" id="search" placeholder="Buscar por ID ou Objeto..." class="bg-slate-900/50 px-4 py-3 rounded-xl text-xs text-slate-300 w-full outline-none border border-slate-700">
+            <input type="text" id="search" placeholder="Buscar por ID..." class="bg-slate-900/50 px-4 py-3 rounded-xl text-xs text-slate-300 w-full outline-none border border-slate-700">
             <select id="statusFilter" class="bg-slate-900/50 px-4 py-3 rounded-xl text-xs text-slate-300 border border-slate-700">
                 <option value="Todos">Status</option>
             </select>
         </div>
 
-        <!-- Table -->
-        <div class="glass-card p-6 overflow-hidden">
+        <!-- Mobile Card View -->
+        <div id="cardContainer" class="grid grid-cols-1 gap-4 md:hidden mb-8"></div>
+
+        <!-- Table View (Desktop) -->
+        <div class="glass-card p-6 overflow-hidden hidden md:block">
             <table class="w-full text-sm text-left">
                 <thead class="text-[10px] text-slate-400 uppercase tracking-wider border-b border-white/5">
                     <tr>

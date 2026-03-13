@@ -26,6 +26,7 @@ class AgSUSApp {
     constructor() {
         this.data = [];
         this.tbody = document.getElementById('tableBody');
+        this.cardContainer = document.getElementById('cardContainer');
         this.search = document.getElementById('search');
         this.statusFilter = document.getElementById('statusFilter');
         
@@ -36,11 +37,11 @@ class AgSUSApp {
     }
 
     async init() {
-        const { data: licitacoes, error } = await sb.from('licitacoes').select('*');
+        const { data, error } = await sb.from('licitacoes').select('*');
         if (error) return;
-        this.data = licitacoes;
+        this.data = data;
         
-        const statuses = [...new Set(licitacoes.map(i => i.status))];
+        const statuses = [...new Set(data.map(i => i.status))];
         statuses.forEach(s => this.statusFilter.innerHTML += `<option value="${s}">${s}</option>`);
         
         this.render();
@@ -57,30 +58,34 @@ class AgSUSApp {
         });
 
         this.tbody.innerHTML = '';
+        this.cardContainer.innerHTML = '';
         let totalVlr = 0;
         
         filtered.forEach(item => {
             const vlr = parseFloat(item.vlr_estimado_anual) || 0;
             totalVlr += vlr;
-            
             const etapa = ETAPAS.find(e => e.descricao === item.fase_atual) || { ordem: 0 };
-            const percent = Math.min((etapa.ordem / 17) * 100, 100);
             
+            // Render Table Row
             this.tbody.innerHTML += `
                 <tr class="row-hover cursor-pointer" onclick="openDetails('${item.id_processo}')">
-                    <td class="p-3 text-blue-400 font-bold">${item.id_processo}</td>
-                    <td class="p-3 text-slate-300">
-                        <div class="text-sm font-bold">${item.objeto_resumido || 'N/I'}</div>
-                        <div class="w-full bg-slate-800 h-1 mt-1 rounded-full overflow-hidden">
-                            <div class="bg-blue-600 h-full" style="width: ${percent}%"></div>
-                        </div>
-                    </td>
-                    <td class="p-3 text-center">
-                        <span class="bg-blue-900 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span>
-                        <div class="text-[9px] text-slate-500 mt-1 font-semibold uppercase">Resp: ${item.responsavel || 'N/I'}</div>
-                    </td>
-                    <td class="p-3 text-right text-white font-mono">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
+                    <td class="p-4 text-blue-400 font-bold">${item.id_processo}</td>
+                    <td class="p-4 text-slate-300">${item.objeto_resumido || 'N/I'}</td>
+                    <td class="p-4"><span class="bg-blue-900/50 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span></td>
+                    <td class="p-4 text-right text-white font-mono">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
                 </tr>
+            `;
+
+            // Render Card
+            this.cardContainer.innerHTML += `
+                <div class="glass-card p-5 border border-border">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-blue-400 font-bold text-sm">${item.id_processo}</span>
+                        <span class="bg-blue-900/50 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">${item.objeto_resumido || 'N/I'}</p>
+                    <div class="text-right font-mono font-bold text-white">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</div>
+                </div>
             `;
         });
         
