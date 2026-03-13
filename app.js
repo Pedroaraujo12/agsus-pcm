@@ -6,55 +6,54 @@ class AgSUSApp {
     constructor() {
         this.data = [];
         this.tbody = document.getElementById('tableBody');
-        this.loadFilters();
+        this.search = document.getElementById('search');
+        this.statusFilter = document.getElementById('statusFilter');
+        
+        this.search.addEventListener('input', () => this.render());
+        this.statusFilter.addEventListener('change', () => this.render());
+        
         this.init();
     }
 
     async init() {
-        this.tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500 animate-pulse">Carregando dados...</td></tr>';
         const { data, error } = await sb.from('licitacoes').select('*');
-        if (error) {
-            this.tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-500">Erro ao carregar dados.</td></tr>';
-            return;
-        }
+        if (error) return;
         this.data = data;
+        
+        // Popular filtro de status
+        const statuses = [...new Set(data.map(i => i.status))];
+        statuses.forEach(s => this.statusFilter.innerHTML += `<option value="${s}">${s}</option>`);
+        
         this.render();
     }
 
-    loadFilters() {
-        const saved = localStorage.getItem('agsus_filters');
-        if (saved) {
-            // Restore filters logic
-        }
-    }
-
-    saveFilters() {
-        // Save filters logic
-    }
-
     render() {
-        this.tbody.innerHTML = '';
-        if (this.data.length === 0) {
-            this.tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">Nenhum processo encontrado.</td></tr>';
-            return;
-        }
+        const searchTerm = this.search.value.toLowerCase();
+        const statusTerm = this.statusFilter.value;
+        
+        const filtered = this.data.filter(item => {
+            const matchesSearch = (item.id_processo || '').toLowerCase().includes(searchTerm);
+            const matchesStatus = (statusTerm === 'Todos' || item.status === statusTerm);
+            return matchesSearch && matchesStatus;
+        });
 
+        this.tbody.innerHTML = '';
         let totalVlr = 0;
-        this.data.forEach(item => {
+        
+        filtered.forEach(item => {
             const vlr = parseFloat(item.vlr_estimado_anual) || 0;
             totalVlr += vlr;
             this.tbody.innerHTML += `
                 <tr class="row-hover cursor-pointer" onclick="openDetails('${item.id_processo}')">
                     <td class="p-3 text-blue-400 font-bold">${item.id_processo}</td>
-                    <td class="p-3 text-slate-300">
-                        <div class="text-sm font-bold">${item.objeto_resumido || 'N/I'}</div>
-                    </td>
-                    <td class="p-3 text-center"><span class="bg-blue-900 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span></td>
+                    <td class="p-3 text-slate-300">${item.objeto_resumido || 'N/I'}</td>
+                    <td class="p-3"><span class="bg-blue-900 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span></td>
                     <td class="p-3 text-right text-white font-mono">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
                 </tr>
             `;
         });
-        document.getElementById('totalProcessos').innerText = this.data.length;
+        
+        document.getElementById('totalProcessos').innerText = filtered.length;
         document.getElementById('vlrEstimado').innerText = totalVlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
     }
 }

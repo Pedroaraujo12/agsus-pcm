@@ -1,0 +1,572 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgSUS PCM | GestÃ£o EstratÃ©gica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-deep: #000000;
+            --glass: rgba(18, 18, 18, 0.7); 
+            --accent: #3b82f6; 
+            --glow: rgba(59, 130, 246, 0.3);
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at 0% 0%, #0f172a 0%, #000000 50%),
+                        radial-gradient(circle at 100% 100%, #1e1b4b 0%, #000000 50%);
+            color: #f8fafc; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden; 
+        }
+        @media (min-width: 1024px) { body { flex-direction: row; } }
+        
+        .glass-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 1.5rem; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        
+        /* SIDEBAR RESPONSIVA FIX */
+        .sidebar { 
+            width: 100%; 
+            height: 64px; 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            padding: 0 16px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            z-index: 1000; 
+            justify-content: space-between; 
+            flex-shrink: 0; 
+            background: rgba(0, 0, 0, 0.95);
+            position: sticky;
+            top: 0;
+        }
+        @media (min-width: 1024px) { 
+            .sidebar { 
+                width: 80px; 
+                height: 100vh; 
+                flex-direction: column; 
+                border-right: 1px solid rgba(255,255,255,0.05); 
+                border-bottom: none; 
+                padding: 24px 0; 
+                justify-content: flex-start; 
+                position: sticky; 
+                top: 0; 
+            } 
+        }
+        
+        .nav-container {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0;
+            scrollbar-width: none;
+        }
+        .nav-container::-webkit-scrollbar { display: none; }
+
+        @media (min-width: 1024px) {
+            .nav-container {
+                flex-direction: column;
+                overflow-x: visible;
+                gap: 8px;
+            }
+        }
+        
+        .nav-item { 
+            position: relative; 
+            width: 40px; 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 12px; 
+            color: #64748b; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer; 
+            flex-shrink: 0;
+        }
+        @media (min-width: 1024px) {
+            .nav-item { width: 48px; height: 48px; margin-bottom: 8px; }
+        }
+
+        .nav-item:hover, .nav-item.active { 
+            color: #ffffff; 
+            background: var(--accent); 
+            box-shadow: 0 0 20px var(--glow); 
+            transform: scale(1.05); 
+        }
+
+        .nav-item .tooltip { 
+            visibility: hidden; 
+            position: absolute; 
+            background: #111; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            z-index: 1000; 
+            opacity: 0; 
+            transition: 0.2s; 
+            pointer-events: none; 
+            left: 140%; 
+            top: 50%; 
+            transform: translateY(-50%); 
+        }
+        @media (min-width: 1024px) { .nav-item:hover .tooltip { visibility: visible; opacity: 1; } }
+        
+        .main-content { flex: 1; padding: 16px; width: 100%; }
+        @media (min-width: 1024px) { .main-content { padding: 40px; } }
+        
+        .status-badge { 
+            font-size: 10px; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.08); 
+        }
+        .aging-badge { 
+            font-size: 9px; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            display: inline-block;
+        }
+        .form-input { 
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 12px; 
+            padding: 12px; 
+            color: white; 
+            outline: none; 
+            width: 100%; 
+            font-size: 13px; 
+        }
+        .form-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.6); }
+        
+        .table-wrapper { width: 100%; overflow-x: auto; border-radius: 1rem; }
+        table { width: 100%; min-width: 1000px; border-collapse: separate; border-spacing: 0 8px; }
+        .row-hover:hover { background: rgba(255,255,255,0.02); }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="text-blue-500 scale-110 flex items-center justify-center">
+            <svg class="w-6 h-6 lg:w-8 lg:h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <nav id="globalNav" class="nav-container"></nav>
+        <div class="hidden lg:block w-8"></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
+            <div class="w-full">
+                <p class="text-[10px] font-medium text-blue-400 uppercase tracking-[0.3em] mb-1">AgSUS PCM SaaS</p>
+                <h1 class="text-2xl md:text-3xl font-black uppercase tracking-tight leading-none text-white">Fluxo de ExecuÃ§Ã£o</h1>
+            </div>
+            <button onclick="location.href='novo-processo.html'" class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition shadow-lg shadow-blue-500/30">+ Novo Processo</button>
+        </header>
+
+        <!-- INDICADORES -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            <div class="glass-card p-6 clickable" onclick="filterByField('status', 'Todos')"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Ativos</p><h3 id="stat_procs" class="text-2xl md:text-4xl font-black">--</h3></div>
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Estimado</p><h3 id="stat_val" class="text-sm md:text-lg font-black truncate">R$ 0,00</h3></div>
+            <div class="glass-card p-6 text-emerald-400 border-l-4 border-l-emerald-500 clickable" onclick="filterByField('status', 'ConcluÃ­do')"><p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">ConcluÃ­dos</p><h3 id="stat_done" class="text-2xl md:text-4xl font-black text-emerald-100">--</h3></div>
+            <div class="glass-card p-6 text-red-100 border-l-4 border-l-red-500 clickable" onclick="filterByField('prazo', 'Atrasados')"><p class="text-[10px] font-bold text-red-500 uppercase mb-1">Atrasos</p><h3 id="stat_delay" class="text-2xl md:text-4xl font-black">--</h3></div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="glass-card p-4 rounded-2xl mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+            <input type="text" id="searchBox" onkeyup="runFilters()" placeholder="Buscar objeto ou ID..." class="form-input bg-slate-800/40">
+            <select id="f-status" onchange="runFilters()" class="form-input">
+                <option value="Todos">Status</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="NÃ£o recebido">NÃ£o recebido</option>
+                <option value="Em InstruÃ§Ã£o">Em InstruÃ§Ã£o</option>
+                <option value="Publicado">Publicado</option>
+                <option value="Homologado">Homologado</option>
+                <option value="Suspenso">Suspenso</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="ConcluÃ­do">ConcluÃ­do</option>
+                <option value="Pendente de assinatura">Pendente de assinatura</option>
+                <option value="Devolvido">Devolvido</option>
+            </select>
+            <select id="f-responsavel" onchange="runFilters()" class="form-input"><option value="Todos">ResponsÃ¡vel</option></select>
+            <select id="f-modalidade" onchange="runFilters()" class="form-input"><option value="Todos">Modalidade</option></select>
+            <select id="f-fase" onchange="runFilters()" class="form-input"><option value="Todos">Etapa (SLA)</option></select>
+            <button onclick="clearAllFilters()" class="bg-slate-700 text-white rounded-xl px-2 py-1.5 text-[10px] font-bold uppercase">Limpar</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-card overflow-hidden h-fit">
+                    <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+                        <h2 id="tableTitle" class="text-xs font-bold uppercase text-slate-400 tracking-widest">Painel Operacional</h2>
+                        <span id="rowCount" class="text-[9px] font-bold bg-slate-800 px-3 py-1 rounded-full text-slate-500">-- processos</span>
+                    </div>
+                    <div class="table-wrapper p-4">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[11px] font-black uppercase text-slate-400 tracking-wider border-b border-white/10">
+                                    <th class="pb-4 pl-4">ID Processo</th>
+                                    <th class="pb-4">Status</th>
+                                    <th class="pb-4">Prazo Tarefa</th>
+                                    <th class="pb-4 text-center">Entrega Final</th>
+                                    <th class="pb-4 text-right">Estimado</th>
+                                    <th class="pb-4 text-center">AÃ§Ãµes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mainTable" class="text-[12px] divide-y divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-indigo-400 mb-6 tracking-widest text-center">Carga da Equipe Ativa</h3><canvas id="chartResp"></canvas></div>
+                <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-blue-400 mb-6 tracking-widest text-center">Modalidades</h3><canvas id="chartMod"></canvas></div>
+                <div class="glass-card p-8 h-[260px]"><h3 class="text-[10px] font-black uppercase text-emerald-400 mb-6 tracking-widest text-center">SaÃºde dos Prazos</h3><canvas id="chartStatus"></canvas></div>
+            </div>
+        </div>
+        <div class="h-20"></div>
+    </main>
+
+    <!-- MODAIS -->
+    <div id="modalDetails" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[150] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-[2rem] overflow-hidden shadow-2rem border border-white/10">
+            <div id="modalContent" class="p-8 space-y-4"></div>
+            <div class="px-8 py-4 border-t border-white/5 text-right flex gap-2 justify-end">
+                <button id="btnSEI" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl text-[10px] font-bold transition">Abrir SEI</button>
+                <button onclick="closeDetails()" class="bg-slate-800 text-white px-8 py-2 rounded-xl text-[10px] font-bold">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEdit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden z-[250] flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+            <div class="bg-blue-600 px-8 py-6 flex justify-between items-center text-white"><h2 class="text-sm font-black uppercase tracking-widest text-white">Editar Processo</h2><button onclick="closeEdit()" class="text-2xl opacity-50">&times;</button></div>
+            <form id="editForm" class="p-8 space-y-4">
+                <input type="hidden" id="edit_id_pk">
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ID Processo (SEI)</label><input type="text" id="edit_proc_id" readonly class="form-input opacity-50"></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Link do SEI</label><input type="url" id="edit_link" class="form-input" placeholder="https://..."></div>
+                <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Objeto</label><textarea id="edit_objeto" rows="2" class="form-input"></textarea></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">ResponsÃ¡vel</label><select id="edit_resp" class="form-input"></select></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Etapa Atual</label><select id="edit_fase" class="form-input"></select></div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Status (Coluna D)</label>
+                    <select id="edit_status" class="form-input">
+                        <option value="">Selecione um status...</option>
+                        <option value="Em andamento">Em andamento</option>
+                        <option value="NÃ£o recebido">NÃ£o recebido</option>
+                        <option value="Em InstruÃ§Ã£o">Em InstruÃ§Ã£o</option>
+                        <option value="Publicado">Publicado</option>
+                        <option value="Homologado">Homologado</option>
+                        <option value="Suspenso">Suspenso</option>
+                        <option value="Cancelado">Cancelado</option>
+                        <option value="ConcluÃ­do">ConcluÃ­do</option>
+                        <option value="Pendente de assinatura">Pendente de assinatura</option>
+                        <option value="Devolvido">Devolvido</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Estimado</label><input type="number" step="0.01" id="edit_val" class="form-input"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Valor Homologado</label><input type="number" step="0.01" id="edit_hom" class="form-input"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Prazo da Tarefa</label><input type="date" id="edit_dt_prev" class="form-input"></div>
+                    <div><label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Entrega Final</label><input type="date" id="edit_dt_entrega" class="form-input"></div>
+                </div>
+                <button type="submit" id="btnSave" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition shadow-lg shadow-blue-500/30">Salvar AlteraÃ§Ãµes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://qakrpkwmhlpynrphucfl.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_GO7Aqg_eNO6hqUIl3rAzyg_GRuiIkWE";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let rawData = [], charts = {}, globalEtapas = [], globalEquipe = [];
+
+        const menuItems = [
+            { title: 'Dashboard', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>', link: 'index.html' },
+            { title: 'Editais', icon: '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>', link: 'editais.html' },
+            { title: 'Propostas', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>', link: 'propostas.html' },
+            { title: 'Contratos', icon: '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', link: 'contratos.html' },
+            { title: 'Almoxarifado', icon: '<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-14v4m0 0l8 4m-8-4l-8 4m8 4l8-4m-8 4V11"/>', link: 'fornecedores.html' },
+            { title: 'InventÃ¡rio', icon: '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>', link: 'avaliacao.html' },
+            { title: 'Pagamentos', icon: '<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>', link: 'pagamentos.html' },
+            { title: 'Protocolar', icon: '<path d="M12 4v16m8-8H4"/>', link: 'novo-processo.html' },
+            { title: 'GovernanÃ§a', icon: '<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>', link: 'admin.html' }
+        ];
+
+        function cleanNum(v) { if (!v) return 0; if (typeof v === 'number') return v; let s = String(v).replace('R$', '').trim(); if (s.includes(',') && !s.includes('e')) s = s.replace(/\./g, '').replace(',', '.'); return parseFloat(s) || 0; }
+        function formatBRL(v) { return cleanNum(v).toLocaleString('pt-br', {style:'currency', currency:'BRL'}); }
+
+        // LÃ“GICA DE TI SENIOR: CÃ¡lculo de Dias Ãšteis Reais (Business Days Engine v4.0 - MASTER FIX)
+        function isHoliday(date) {
+            const holidays = [
+                '2026-01-01', '2026-02-16', '2026-02-17', '2026-04-03', '2026-04-21',
+                '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12', '2026-11-02',
+                '2026-11-15', '2026-11-20', '2026-12-25'
+            ];
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return holidays.includes(`${y}-${m}-${d}`);
+        }
+
+        function getBusinessDaysDiff(startDate, endDate) {
+            let count = 0;
+            let curDate = new Date(startDate.getTime());
+            curDate.setHours(12, 0, 0, 0);
+            const targetDate = new Date(endDate.getTime());
+            targetDate.setHours(12, 0, 0, 0);
+            const isNegative = targetDate < curDate;
+            if (isNegative) {
+                while (curDate > targetDate) {
+                    curDate.setDate(curDate.getDate() - 1);
+                    if (curDate.getDay() !== 0 && curDate.getDay() !== 6 && !isHoliday(curDate)) count--;
+                }
+            } else {
+                while (curDate < targetDate) {
+                    curDate.setDate(curDate.getDate() + 1);
+                    if (curDate.getDay() !== 0 && curDate.getDay() !== 6 && !isHoliday(curDate)) count++;
+                }
+            }
+            return count;
+        }
+
+        function getAging(dateStr, status) {
+            const statusConfig = {
+                'ConcluÃ­do': { label: 'FINALIZADO', class: 'bg-indigo-500/20 text-indigo-400' },
+                'Cancelado': { label: 'CANCELADO', class: 'bg-red-900/40 text-red-400' },
+                'Devolvido': { label: 'DEVOLVIDO', class: 'bg-rose-500/20 text-rose-400' },
+                'Suspenso': { label: 'SUSPENSO', class: 'bg-amber-900/40 text-amber-400' }
+            };
+            if (statusConfig[status]) return statusConfig[status];
+            if (!dateStr || dateStr === 'None' || dateStr === '') return { label: 'S/ PRAZO', class: 'bg-slate-800 text-slate-500' };
+            try {
+                let target;
+                if (dateStr.includes('/')) {
+                    const [d, m, y] = dateStr.split('/');
+                    target = new Date(y, m - 1, d, 12, 0, 0);
+                } else {
+                    const [y, m, d] = dateStr.split('T')[0].split('-');
+                    target = new Date(y, m - 1, d, 12, 0, 0);
+                }
+                const today = new Date();
+                today.setHours(12, 0, 0, 0);
+                const diffDays = getBusinessDaysDiff(today, target);
+                if (diffDays < 0) return { label: `Atrasado ${Math.abs(diffDays)} DU`, class: 'bg-red-500/20 text-red-500 border border-red-500/50' };
+                if (diffDays <= 2) return { label: `Vence ${diffDays} DU`, class: 'bg-amber-500/20 text-amber-500 border border-amber-500/50' };
+                return { label: `SLA OK (${diffDays} DU)`, class: 'bg-emerald-500/20 text-emerald-500' };
+            } catch (e) { return { label: 'ERRO DATA', class: 'bg-red-900 text-white' }; }
+        }
+
+        async function init() {
+            try {
+                const nav = document.getElementById('globalNav');
+                if(nav) nav.innerHTML = menuItems.map(m => `<div class="nav-item ${window.location.pathname.includes(m.link)?'active':''}" onclick="location.href='${m.link}'"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${m.icon}</svg><span class="tooltip">${m.title}</span></div>`).join('');
+                const { data: etapas } = await sb.from('fluxo_etapas').select('*').order('ordem');
+                const { data: equipe } = await sb.from('equipe').select('*').order('nome');
+                globalEtapas = etapas || []; globalEquipe = equipe || [];
+                if (document.getElementById('f-fase')) globalEtapas.forEach(e => document.getElementById('f-fase').add(new Option(e.descricao, e.descricao)));
+                if (document.getElementById('f-responsavel')) globalEquipe.forEach(r => document.getElementById('f-responsavel').add(new Option(r.nome, r.nome)));
+                const { data, error } = await sb.from('licitacoes').select('*').order('id_processo');
+                if (error) throw error;
+                rawData = data || [];
+                const fMod = document.getElementById('f-modalidade');
+                if (fMod) {
+                    const mods = [...new Set(rawData.map(i => i.modalidade).filter(Boolean))].sort();
+                    mods.forEach(v => fMod.add(new Option(v, v)));
+                }
+                updateView(rawData);
+            } catch (err) { console.error("Erro Init:", err); }
+        }
+
+        function runFilters() {
+            const s = document.getElementById('searchBox').value.toLowerCase();
+            const f = document.getElementById('f-fase').value;
+            const r = document.getElementById('f-responsavel').value;
+            const m = document.getElementById('f-modalidade').value;
+            const st = document.getElementById('f-status').value;
+            const filtered = rawData.filter(i => {
+                if (s && !(String(i.objeto_resumido||"") + String(i.id_processo||"")).toLowerCase().includes(s)) return false;
+                if (f !== 'Todos' && i.fase_atual !== f) return false;
+                if (r !== 'Todos' && i.responsavel !== r) return false;
+                if (m !== 'Todos' && i.modalidade !== m) return false;
+                if (st !== 'Todos' && i.status !== st) return false;
+                return true;
+            });
+            updateView(filtered);
+        }
+
+        function filterByField(field, value) { 
+            const el = document.getElementById(`f-${field}`);
+            if(el) { el.value = value; runFilters(); }
+        }
+        function clearAllFilters() { 
+            document.getElementById('searchBox').value = ''; 
+            document.getElementById('f-status').value = 'Todos'; 
+            document.getElementById('f-responsavel').value = 'Todos'; 
+            document.getElementById('f-modalidade').value = 'Todos'; 
+            document.getElementById('f-fase').value = 'Todos'; 
+            runFilters(); 
+        }
+
+        function updateView(data) {
+            const ativos = data.filter(i => i.status !== 'ConcluÃ­do' && i.status !== 'Cancelado');
+            const concluidos = data.filter(i => i.status === 'ConcluÃ­do');
+            if(document.getElementById('stat_procs')) document.getElementById('stat_procs').innerText = ativos.length;
+            if(document.getElementById('stat_done')) document.getElementById('stat_done').innerText = concluidos.length;
+            if(document.getElementById('rowCount')) document.getElementById('rowCount').innerText = `${data.length} PROCESSOS`;
+            const est = data.reduce((acc, i) => acc + cleanNum(i.vlr_estimado_anual), 0);
+            const hom = data.reduce((acc, i) => acc + cleanNum(i.vlr_homologado), 0);
+            if(document.getElementById('stat_val')) document.getElementById('stat_val').innerText = formatBRL(est);
+            if(document.getElementById('stat_delay')) {
+                const countDelay = ativos.filter(i => {
+                    const aging = getAging(i.data_prevista, i.status);
+                    return aging.label.includes('Atrasado');
+                }).length;
+                document.getElementById('stat_delay').innerText = countDelay;
+            }
+            
+            const table = document.getElementById('mainTable');
+            if(table) {
+                table.innerHTML = data.map(i => {
+                    const aging = getAging(i.data_prevista, i.status);
+                    const processIdHtml = i.processo_link ? `<a href="${i.processo_link}" target="_blank" onclick="event.stopPropagation()" class="text-blue-400 hover:underline">${i.id_processo}</a>` : i.id_processo;
+                    
+                    const formatDt = (d) => {
+                        if (!d || d === 'None' || d === '') return '-';
+                        const parts = d.includes('T') ? d.split('T')[0].split('-') : d.split('-');
+                        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        if (d.includes('/')) return d;
+                        return '-';
+                    };
+
+                    return `<tr class="row-hover transition cursor-pointer" onclick="openDetails('${i.id_processo}')">
+                        <td class="p-4 font-black text-blue-400">${processIdHtml}</td>
+                        <td class="p-4 text-xs font-medium text-slate-300">${i.responsavel || '--'}</td>
+                        <td class="p-4 font-bold text-slate-100 text-sm">${i.fase_atual || 'N/I'}</td>
+                        <td class="p-4"><span class="status-pill bg-slate-800 text-slate-300 border-slate-700">${i.status || '--'}</span></td>
+                        <td class="p-4 text-center">
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="aging-badge ${aging.class}">${aging.label}</span>
+                                <span class="text-[10px] text-slate-400 font-bold">${formatDt(i.data_prevista)}</span>
+                            </div>
+                        </td>
+                        <td class="p-4 text-center">
+                            <span class="text-[11px] font-black text-slate-200">${formatDt(i.data_entrega_final)}</span>
+                        </td>
+                        <td class="p-4 text-right font-black text-slate-100 text-sm">${formatBRL(i.vlr_estimado_anual)}</td>
+                        <td class="p-4 text-center"><div class="flex justify-center gap-3"><button onclick="event.stopPropagation(); openEdit('${i.id_processo}')" class="p-1 hover:text-blue-400 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button><button onclick="event.stopPropagation(); deleteProc('${i.id_processo}')" class="p-1 hover:text-red-500 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></td>
+                    </tr>`;
+                }).join('');
+            }
+            renderCharts(ativos);
+        }
+
+        function renderCharts(ativos) {
+            const countBy = (k) => ativos.reduce((a, i) => { let v = i[k]||'N/I'; a[v]=(a[v]||0)+1; return a; }, {});
+            if(charts.mod) charts.mod.destroy();
+            const cMod = document.getElementById('chartMod');
+            if (cMod) {
+                const modData = countBy('modalidade');
+                charts.mod = new Chart(cMod, { type: 'doughnut', data: { labels: Object.keys(modData), datasets: [{ data: Object.values(modData), backgroundColor: ['#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('modalidade', Object.keys(modData)[activeEls[0].index]); }, plugins: { legend: { display: false } } } });
+            }
+            if(charts.resp) charts.resp.destroy();
+            const cResp = document.getElementById('chartResp');
+            if (cResp) {
+                const resData = countBy('responsavel');
+                const labels = Object.keys(resData).sort((a,b) => (a==='N/I'?1:b==='N/I'?-1:resData[b]-resData[a]));
+                charts.resp = new Chart(cResp, { type: 'bar', data: { labels, datasets: [{ data: labels.map(l => resData[l]), backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { indexAxis: 'y', maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('responsavel', labels[activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#64748b', font: { size: 9 } } } } } });
+            }
+            if(charts.stat) charts.stat.destroy();
+            const cStatus = document.getElementById('chartStatus');
+            if (cStatus) {
+                const s = { ok: 0, alert: 0, late: 0 };
+                ativos.forEach(i => { const l = getAging(i.data_prevista, i.status).label; if(l.includes('OK')) s.ok++; else if(l.includes('Vence')) s.alert++; else if(l.includes('Atrasado')) s.late++; });
+                charts.stat = new Chart(cStatus, { type: 'bar', data: { labels: ['SLA OK', 'Alerta', 'Atrasado'], datasets: [{ data: [s.ok, s.alert, s.late], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderRadius: 4 }] }, options: { maintainAspectRatio: false, onClick: (e, activeEls) => { if (activeEls.length > 0) filterByField('prazo', ['No Prazo', 'Alerta', 'Atrasados'][activeEls[0].index]); }, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 9 } } }, y: { display: false } } } });
+            }
+        }
+
+        function openEdit(id) {
+            const item = rawData.find(x => x.id_processo === id);
+            const selR = document.getElementById('edit_resp'); selR.innerHTML = ''; globalEquipe.forEach(r => selR.add(new Option(r.nome, r.nome)));
+            const selF = document.getElementById('edit_fase'); selF.innerHTML = ''; globalEtapas.forEach(e => selF.add(new Option(e.descricao, e.descricao)));
+            document.getElementById('edit_id_pk').value = item.id_processo;
+            document.getElementById('edit_proc_id').value = item.id_processo;
+            document.getElementById('edit_objeto').value = item.objeto_resumido;
+            document.getElementById('edit_link').value = item.processo_link || "";
+            document.getElementById('edit_resp').value = item.responsavel || "";
+            document.getElementById('edit_fase').value = item.fase_atual || "";
+            if(document.getElementById('edit_status')) document.getElementById('edit_status').value = item.status || "Em andamento";
+            document.getElementById('edit_dt_prev').value = item.data_prevista ? item.data_prevista.split('T')[0] : "";
+            document.getElementById('edit_dt_entrega').value = item.data_entrega_final ? item.data_entrega_final.split('T')[0] : "";
+            document.getElementById('edit_val').value = cleanNum(item.vlr_estimado_anual);
+            document.getElementById('edit_hom').value = cleanNum(item.vlr_homologado);
+            document.getElementById('modalEdit').classList.remove('hidden');
+        }
+
+        document.getElementById('editForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSave');
+            btn.innerText = "SALVANDO..."; btn.disabled = true;
+            try {
+                const payload = { 
+                    objeto_resumido: document.getElementById('edit_objeto').value, 
+                    processo_link: document.getElementById('edit_link').value, 
+                    responsavel: document.getElementById('edit_resp').value, 
+                    fase_atual: document.getElementById('edit_fase').value, 
+                    status: document.getElementById('edit_status').value,
+                    data_prevista: document.getElementById('edit_dt_prev').value,
+                    data_entrega_final: document.getElementById('edit_dt_entrega').value,
+                    vlr_estimado_anual: document.getElementById('edit_val').value, 
+                    vlr_homologado: document.getElementById('edit_hom').value 
+                };
+                await sb.from('licitacoes').update(payload).eq('id_processo', document.getElementById('edit_id_pk').value);
+                location.reload();
+            } catch (err) { alert("Erro."); btn.innerText = "SALVAR"; btn.disabled = false; }
+        }
+
+        function openDetails(id) {
+            const item = rawData.find(x => x.id_processo === id);
+            document.getElementById('modalContent').innerHTML = `<h2 class="text-2xl font-black mb-4 uppercase text-white">${item.id_processo}</h2><div class="glass-card p-6 bg-white/5 border-white/10 mb-6"><p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2">Objeto</p><p class="text-sm font-medium leading-relaxed">${item.objeto_resumido}</p></div><div class="grid grid-cols-2 gap-4"><div class="p-4 bg-white/5 rounded-xl border border-white/5"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">ResponsÃ¡vel</p><p class="font-black text-xs">${item.responsavel||'N/I'}</p></div><div class="p-4 bg-white/5 rounded-xl border border-white/5"><p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Fase SLA</p><p class="font-black text-xs text-indigo-400">${item.fase_atual||'N/I'}</p></div></div>`;
+            const btn = document.getElementById('btnSEI'); if(item.processo_link) { btn.classList.remove('hidden'); btn.onclick = () => window.open(item.processo_link, '_blank'); } else btn.classList.add('hidden');
+            document.getElementById('modalDetails').classList.remove('hidden');
+        }
+
+        function deleteProc(id) { if(confirm(`Excluir ${id}?`)) { sb.from('licitacoes').delete().eq('id_processo', id).then(() => location.reload()); } }
+        function closeEdit() { document.getElementById('modalEdit').classList.add('hidden'); }
+        function closeDetails() { document.getElementById('modalDetails').classList.add('hidden'); }
+        window.onload = init;
+    </script>
+</body>
+</html>

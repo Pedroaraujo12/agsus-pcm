@@ -8,62 +8,56 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { border: '#e2e8f0', background: '#0f172a' } } } }
-    </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
-        .bg-card { background: #1e293b; }
-        .border-border { border: 1px solid #334155; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="flex h-screen bg-slate-950">
 
     <!-- Sidebar -->
-    <aside class="w-64 border-r border-border bg-slate-900 hidden md:flex flex-col p-6">
-        <h2 class="text-xl font-bold mb-10 text-white tracking-tighter">AgSUS PCM</h2>
+    <aside class="w-64 border-r border-border bg-slate-900 hidden md:flex flex-col p-6 sidebar">
+        <h2 class="text-xl font-black mb-10 text-white tracking-tighter uppercase">AgSUS PCM</h2>
         <nav class="space-y-4">
-            <a href="#" class="block text-blue-400 font-medium">Dashboard</a>
-            <a href="#" class="block text-slate-400 hover:text-white transition">Licitações</a>
-            <a href="#" class="block text-slate-400 hover:text-white transition">Processos</a>
-            <a href="#" class="block text-slate-400 hover:text-white transition">Configurações</a>
+            <a href="#" class="block text-blue-400 font-bold text-sm">Dashboard</a>
+            <a href="#" class="block text-slate-400 hover:text-white transition font-medium text-sm">Licitações</a>
+            <a href="#" class="block text-slate-400 hover:text-white transition font-medium text-sm">Processos</a>
         </nav>
     </aside>
 
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto p-8">
-        <header class="flex justify-between items-center mb-8">
+        <header class="flex justify-between items-center mb-10">
             <div>
-                <h1 class="text-2xl font-bold">Gestão Estratégica</h1>
-                <p class="text-slate-400 text-sm">Monitoramento de Licitações</p>
+                <h1 class="text-2xl font-black uppercase tracking-tight text-white">Gestão Estratégica</h1>
+                <p class="text-slate-500 text-xs font-medium">Monitoramento de Licitações</p>
             </div>
-            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">+ Novo Processo</button>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest transition shadow-lg shadow-blue-500/20">
+                + Novo Processo
+            </button>
         </header>
 
         <!-- Stats -->
-        <div class="grid grid-cols-4 gap-4 mb-8">
-            <div class="bg-card p-6 rounded-lg border border-border">
-                <p class="text-xs text-slate-400 font-medium">Ativos</p>
-                <h3 id="totalProcessos" class="text-3xl font-bold">-</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="glass-card p-6">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Ativos</p>
+                <h3 id="totalProcessos" class="text-3xl font-black text-white">-</h3>
             </div>
-            <div class="bg-card p-6 rounded-lg border border-border">
-                <p class="text-xs text-slate-400 font-medium">Valor Total</p>
-                <h3 id="vlrEstimado" class="text-xl font-bold">R$ 0,00</h3>
+            <div class="glass-card p-6">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Valor Estimado</p>
+                <h3 id="vlrEstimado" class="text-xl font-black text-white">R$ 0,00</h3>
             </div>
         </div>
 
         <!-- Filters -->
-        <div class="bg-card p-4 rounded-lg border border-border mb-6 flex gap-4">
-            <input type="text" id="search" placeholder="Filtrar por ID..." class="bg-slate-900 px-3 py-2 rounded text-sm w-full outline-none border border-slate-700">
-            <select id="statusFilter" class="bg-slate-900 px-3 py-2 rounded text-sm border border-slate-700">
+        <div class="glass-card p-4 mb-8 flex gap-4">
+            <input type="text" id="search" placeholder="Buscar por ID ou Objeto..." class="bg-slate-900/50 px-4 py-3 rounded-xl text-xs text-slate-300 w-full outline-none border border-slate-700">
+            <select id="statusFilter" class="bg-slate-900/50 px-4 py-3 rounded-xl text-xs text-slate-300 border border-slate-700">
                 <option value="Todos">Status</option>
             </select>
         </div>
 
         <!-- Table -->
-        <div class="bg-card rounded-lg border border-border overflow-hidden">
+        <div class="glass-card p-6 overflow-hidden">
             <table class="w-full text-sm text-left">
-                <thead class="bg-slate-800 text-slate-300 uppercase text-[10px] tracking-wider">
+                <thead class="text-[10px] text-slate-400 uppercase tracking-wider border-b border-white/5">
                     <tr>
                         <th class="p-4">Processo</th>
                         <th class="p-4">Objeto</th>
@@ -71,7 +65,7 @@
                         <th class="p-4 text-right">Valor</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="divide-y divide-border"></tbody>
+                <tbody id="tableBody" class="divide-y divide-white/5"></tbody>
             </table>
         </div>
     </main>
