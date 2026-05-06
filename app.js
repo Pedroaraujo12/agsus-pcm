@@ -26,7 +26,7 @@ class AgSUSApp {
     constructor() {
         this.data = [];
         this.tbody = document.getElementById('tableBody');
-        this.cardContainer = document.getElementById('cardContainer'); // FIX: Inicializando o container
+        this.cardContainer = document.getElementById('cardContainer');
         this.search = document.getElementById('search');
         this.statusFilter = document.getElementById('statusFilter');
         
@@ -45,6 +45,15 @@ class AgSUSApp {
         statuses.forEach(s => this.statusFilter.innerHTML += `<option value="${s}">${s}</option>`);
         
         this.render();
+    }
+
+    formatDate(dateStr) {
+        if (!dateStr) return '--';
+        try {
+            return new Date(dateStr).toLocaleDateString('pt-BR');
+        } catch {
+            return dateStr;
+        }
     }
 
     render() {
@@ -67,7 +76,9 @@ class AgSUSApp {
             
             const etapa = ETAPAS.find(e => e.descricao === item.fase_atual) || { ordem: 0 };
             const percent = Math.min((etapa.ordem / 17) * 100, 100);
-            
+            const atividadeAtual = item.fase_atual || '--';
+            const dadosAtividade = this.formatDate(item.data_prevista);
+
             this.tbody.innerHTML += `
                 <tr class="row-hover cursor-pointer" onclick="openDetails('${item.id_processo}')">
                     <td class="p-3 text-blue-400 font-bold">${item.id_processo}</td>
@@ -77,8 +88,8 @@ class AgSUSApp {
                             <div class="bg-blue-600 h-full" style="width: ${percent}%"></div>
                         </div>
                     </td>
-                    <td class="p-3 text-center"><span class="bg-blue-900/50 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span></td>
-                    <td class="p-3 text-right text-white font-mono">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
+                    <td class="p-3 text-slate-300 text-xs">${atividadeAtual}</td>
+                    <td class="p-3 text-slate-400 text-xs font-mono">${dadosAtividade}</td>
                 </tr>
             `;
 
@@ -87,10 +98,11 @@ class AgSUSApp {
                     <div class="glass-card p-5 border border-border">
                         <div class="flex justify-between items-start mb-3">
                             <span class="text-blue-400 font-bold text-sm">${item.id_processo}</span>
-                            <span class="bg-blue-900/50 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span>
+                            <span class="bg-blue-900/50 text-blue-200 px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status || '--'}</span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-4">${item.objeto_resumido || 'N/I'}</p>
-                        <div class="text-right font-mono font-bold text-white">${vlr.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</div>
+                        <p class="text-xs text-slate-400 mb-2">${item.objeto_resumido || 'N/I'}</p>
+                        <p class="text-xs text-slate-500 mb-1"><span class="font-bold text-slate-400">Atividade:</span> ${atividadeAtual}</p>
+                        <p class="text-xs text-slate-500"><span class="font-bold text-slate-400">Data:</span> ${dadosAtividade}</p>
                     </div>
                 `;
             }
